@@ -12,3 +12,40 @@ generator client {
 datasource db {
   provider = "mongodb"
 }
+
+model Usuario {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  nome           String
+  email          String   @unique
+  senha          String
+  cpf            String   @unique // Preferi usar CPF porque o RG vai ser substituído 
+  dataNascimento DateTime
+  telefone       String
+  status         String   @default("ATIVO")
+  Endereco       Endereco @relation(fields: [enderecoId], references: [id]) // Coloco esse atributo do tipo Endereco pra criar a relação. O FK é o enderecoId
+  enderecoId     String   @unique @db.ObjectId
+}
+
+model Endereco {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  rua         String
+  numero      String
+  complemento String?
+  bairro      String
+  cidade      String
+  estado      String
+  cep         String
+  usuarios    Usuario[] // Relacionamento inverso para acessar o usuário associado a essee endereço
+}
+
+model Acervo {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  isbn          String @unique
+  titulo        String
+  autor         String
+  editora       String
+  edicao        String
+  anoPublicacao Int
+  descricao     String
+  unidades      Int
+}
