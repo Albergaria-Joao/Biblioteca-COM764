@@ -48,4 +48,15 @@ model Acervo {
   anoPublicacao Int
   descricao     String
   unidades      Int
+  reservas      Reservas[]
+}
+
+model Reservas{
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  isbn          String @unique
+  titulo        String
+  autor         String
+  Datares       DateTime
+  Valires       DateTime
+  usuarios      Usuario[]
 }
