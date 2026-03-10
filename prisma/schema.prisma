@@ -57,7 +57,7 @@ model Reservas{
   isbn          String @unique
   titulo        String
   autor         String
-  Datares       DateTime
+  Datares       DateTime @default(now())
   Valires       DateTime
   usuarios      Usuario[]
 }

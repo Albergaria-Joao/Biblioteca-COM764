@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@prisma/client": "^7.4.2",
     "next": "16.1.6",
     "nodemon": "^3.1.14",
     "prisma": "^7.4.2",
