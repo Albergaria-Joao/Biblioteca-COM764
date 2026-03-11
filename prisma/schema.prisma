@@ -5,26 +5,27 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL") // Ignora esse erro se tiver, o meu formatador do VS pelo menos tá no Prisma 7 (que não tem mais URL) e fica vermelho
 }
 
 model Usuario {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
   nome           String
-  email          String   @unique
+  email          String    @unique
   senha          String
-  cpf            String   @unique // Preferi usar CPF porque o RG vai ser substituído 
+  cpf            String    @unique // Preferi usar CPF porque o RG vai ser substituído 
   dataNascimento DateTime
   telefone       String
-  status         String   @default("ATIVO")
-  Endereco       Endereco @relation(fields: [enderecoId], references: [id]) // Coloco esse atributo do tipo Endereco pra criar a relação. O FK é o enderecoId
-  enderecoId     String   @unique @db.ObjectId
+  status         String    @default("ATIVO")
+  Endereco       Endereco  @relation(fields: [enderecoId], references: [id]) // Coloco esse atributo do tipo Endereco pra criar a relação. O FK é o enderecoId
+  enderecoId     String    @unique @db.ObjectId
+  reservas       Reservas? @relation(fields: [reservasId], references: [id])
+  reservasId     String?   @db.ObjectId
 }
 
 model Endereco {
@@ -40,8 +41,8 @@ model Endereco {
 }
 
 model Acervo {
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
-  isbn          String @unique
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  isbn          String     @unique
   titulo        String
   autor         String
   editora       String
@@ -52,12 +53,14 @@ model Acervo {
   reservas      Reservas[]
 }
 
-model Reservas{
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
-  isbn          String @unique
-  titulo        String
-  autor         String
-  Datares       DateTime @default(now())
-  Valires       DateTime
-  usuarios      Usuario[]
+model Reservas {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  isbn     String    @unique
+  titulo   String
+  autor    String
+  Datares  DateTime  @default(now())
+  Valires  DateTime
+  usuarios Usuario[]
+  acervo   Acervo?   @relation(fields: [acervoId], references: [id])
+  acervoId String?   @db.ObjectId
 }

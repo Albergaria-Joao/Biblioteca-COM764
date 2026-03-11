@@ -1,0 +1,13 @@
+npm uninstall prisma @prisma/client
+    Veio instalado o 7 por padrão com o projeto Next
+
+npm install @prisma/client@6 e npm install -D prisma@6
+    Prisma 7 não tem suporte para Mongo, então instala o 6
+
+npx prisma generate
+    Gera o Prisma Client (que ele não tava pegando porque não existia)
+    Cada vez que mudar o schema, tem que rodar isso
+
+npx prisma db push
+    faz push do schema pro banco no mongo
+    
