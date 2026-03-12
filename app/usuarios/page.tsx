@@ -1,4 +1,29 @@
+"use client"
+
+import { useEffect, useState } from "react";
+
+type Usuario = {
+  id: number
+  nome: string
+  email: string
+  cpf: string
+  telefone: string
+}
+
 export default function UsuariosPage() {
+
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+
+  useEffect(() => {
+    async function carregarUsuarios() {
+      const response = await fetch("/api/usuarios");
+      const data = await response.json();
+      setUsuarios(data);
+    }
+
+    carregarUsuarios();
+  }, []);
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>Lista de Usuários</h1>
@@ -15,13 +40,15 @@ export default function UsuariosPage() {
         </thead>
 
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Usuário Teste</td>
-            <td>teste@email.com</td>
-            <td>00000000000</td>
-            <td>11999999999</td>
-          </tr>
+          {usuarios.map((usuario) => (
+            <tr key={usuario.id}>
+              <td>{usuario.id}</td>
+              <td>{usuario.nome}</td>
+              <td>{usuario.email}</td>
+              <td>{usuario.cpf}</td>
+              <td>{usuario.telefone}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

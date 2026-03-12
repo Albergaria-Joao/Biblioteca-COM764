@@ -12,6 +12,8 @@ export async function GET() {
         id: true,
         nome: true,
         email: true,
+        cpf: true,
+        telefone: true,
       },
     });
 
