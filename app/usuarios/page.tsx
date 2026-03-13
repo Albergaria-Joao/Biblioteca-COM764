@@ -24,29 +24,29 @@ export default function UsuariosPage() {
     carregarUsuarios();
   }, []);
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h1>Lista de Usuários</h1>
+ return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Lista de Usuários</h1>
 
-      <table border={1} cellPadding={10} cellSpacing={0}>
-        <thead>
+      <table className="border border-gray-300 w-full">
+        <thead className="bg-gray-200">
           <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>CPF</th>
-            <th>Telefone</th>
+            <th className="border px-4 py-2">ID</th>
+            <th className="border px-4 py-2">Nome</th>
+            <th className="border px-4 py-2">Email</th>
+            <th className="border px-4 py-2">CPF</th>
+            <th className="border px-4 py-2">Telefone</th>
           </tr>
         </thead>
 
         <tbody>
           {usuarios.map((usuario) => (
-            <tr key={usuario.id}>
-              <td>{usuario.id}</td>
-              <td>{usuario.nome}</td>
-              <td>{usuario.email}</td>
-              <td>{usuario.cpf}</td>
-              <td>{usuario.telefone}</td>
+            <tr key={usuario.id} className="hover:bg-gray-100">
+              <td className="border px-4 py-2">{usuario.id}</td>
+              <td className="border px-4 py-2">{usuario.nome}</td>
+              <td className="border px-4 py-2">{usuario.email}</td>
+              <td className="border px-4 py-2">{usuario.cpf}</td>
+              <td className="border px-4 py-2">{usuario.telefone}</td>
             </tr>
           ))}
         </tbody>
