@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import { GET } from "../api/usuarios/route";
 
 type Usuario = {
   id: number
@@ -16,8 +17,11 @@ export default function UsuariosPage() {
 
   useEffect(() => {
     async function carregarUsuarios() {
-      const response = await fetch("/api/usuarios");
+      const response = await fetch("/api/usuarios", {
+        method:'GET'
+      });
       const data = await response.json();
+      console.log(data)
       setUsuarios(data);
     }
 
