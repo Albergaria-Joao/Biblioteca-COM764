@@ -7,7 +7,6 @@ export async function GET() {
 
     // Funciona que nem um select do SQL. Você escolhe as colunas e um limite (take)
     const usuarios = await prisma.usuario.findMany({
-      take: 10,
       select: {
         id: true,
         nome: true,
@@ -25,3 +24,4 @@ export async function GET() {
     );
   }
 }
+
