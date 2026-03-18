@@ -1,16 +1,53 @@
 import { NextResponse } from "next/server";
+import { prisma } from '@/lib/prisma';
+import bcrypt from "bcrypt";
+import { cookies } from 'next/headers';
 
-//Quando criar a pagina de login utilizar esta rota para armazenar o id nos cookies
-export async function POST() {
 
-    const userId = "69b349dd03f7611173120d95"; //Id do usuario vai entrar aqui
+export async function POST(request: Request) {
+    const body = await request.json();
 
-    const response = NextResponse.json({ ok: true });
+    const usuarioEncontrado = await prisma.usuario.findUnique({
+        where :{
+            email: body.email,
+        },
+        select: {
+            id: true,
+            senha: true,
+        }
+    })
 
-    response.cookies.set("userId", userId, {
-        httpOnly: true, //Java script do navegador não pode acessar esse cookies, questões de segurança
-        path: "/", //todas rotas tem acesso a esse cookie
-    });
+    // Se não tiver encontrado o usuário
+    if (!usuarioEncontrado) {
+        console.log("Usuário não encontrado")
+        return NextResponse.json(
+            { erro: "Credenciais inválidas" },
+            { status: 401 } 
+        );
+    }
 
-    return response
+    // Validação de senha com o hashing do BCrypt
+    const senhaValidada = await bcrypt.compare(body.senha, usuarioEncontrado.senha);
+    if (!senhaValidada) {
+        console.log("Senha inválida")
+        return NextResponse.json(
+            { erro: "Credenciais inválidas" },
+            { status: 401 } 
+        );
+    }
+
+    console.log("logou");
+
+    const cookiesApp = await cookies();
+    cookiesApp.set("userId", usuarioEncontrado.id, {
+        httpOnly: true, 
+        path: "/", 
+    }); // Além do ID simplesmente, podemos usar verificação via JWT para mais segurança em cada requisição do banco
+
+    return NextResponse.json(
+        { login: true },
+        { status: 200 }
+    );
+    
+    
 }

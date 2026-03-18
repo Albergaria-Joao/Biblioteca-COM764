@@ -8,8 +8,7 @@ export async function GET() {
 
         //Buscando o id do user utilizanod a pagina
         const cookieStorage = cookies();
-        //const userId = (await cookieStorage).get("userId")?.value;
-        const userId = "69b349dd03f7611173120d95";
+        const userId = (await cookieStorage).get("userId")?.value;
 
         //Verifica autenticação
         if (!userId) {

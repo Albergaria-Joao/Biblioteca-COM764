@@ -34,7 +34,7 @@ const usuarioSchema = z.object({
   // estado: z.string().length(2, "O estado deve ter 2 letras (UF)")
 });
 
-export default function UsuariosPage() {
+export default function CadastroPage() {
 
   async function criarUsuario(
     email: string,
@@ -54,9 +54,12 @@ export default function UsuariosPage() {
   ) {
     console.log(cpf)
 
+
+    // Formatação de data para o banco aceitar
     const dataNascStr = dataNasc + "T00:00:00.000Z";
+
     console.log(dataNascStr)
-    const response = await fetch("/api/usuarios/cadastrar", {
+    const response = await fetch("/api/cadastro", {
         method:'POST',
         body: JSON.stringify({
           email, senha, 
@@ -68,10 +71,8 @@ export default function UsuariosPage() {
           cep
         })
     });
-    // const data = await response.json();
-    // if (data.status == 200) {
-    //   navigate("/usuarios")
-    // }
+
+    // Adicionar validações e retornos de dados incorretos aqui quando fizer
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
