@@ -45,11 +45,21 @@ export default function PerfilPage() {
         carregarUsuario();
     }, []);
 
+    //Criar função para passar os parametros e chamar o método POST da rota perfil
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        
+    };
+
+
+    
     // Enquanto carrega
     if (!usuario) {
         return <p className="p-6">Carregando...</p>;
     }
 
+    //Adicionar um form cubbrindo tudo isso, para lidar com o handleSubit
     return (
         <div className="p-6 max-w-4xl mx-auto">
 
