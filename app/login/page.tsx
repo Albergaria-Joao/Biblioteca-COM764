@@ -15,7 +15,7 @@ export default function LoginPage() {
         email: string,
         senha: string,
     ) {
-        const response = await fetch("/api/login", {
+        const response = await fetch("/api/usuarios/login", {
             method:'POST',
             body: JSON.stringify({
                 email, senha

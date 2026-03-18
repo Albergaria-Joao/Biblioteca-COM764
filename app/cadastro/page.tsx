@@ -59,7 +59,7 @@ export default function CadastroPage() {
     const dataNascStr = dataNasc + "T00:00:00.000Z";
 
     console.log(dataNascStr)
-    const response = await fetch("/api/cadastro", {
+    const response = await fetch("/api/usuarios/cadastro", {
         method:'POST',
         body: JSON.stringify({
           email, senha, 
