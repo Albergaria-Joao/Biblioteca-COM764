@@ -195,10 +195,6 @@ export default function CadastroPage() {
         </form>
       </div>
 
-      <div>
-        <h1>RATO</h1>
-      </div>
-
     </div>
   );
 }
