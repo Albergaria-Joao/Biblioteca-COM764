@@ -13,12 +13,14 @@ export async function middleware(request: NextRequest) {
     try {
         await jwtVerify(token, SECRET);
         console.log(token)
-        return NextResponse.next();
+        return NextResponse.next(); // Passa para o destino
+
+        // Adicionar verificação de cargo depois
     } catch (error) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 }
 
 export const config = {
-    matcher: ["/usuarios/:path*", "/perfil/:path*"]
+    matcher: ["/usuarios/:path*", "/perfil/:path*"] // Onde o middleware vai ficar de olho
 }
