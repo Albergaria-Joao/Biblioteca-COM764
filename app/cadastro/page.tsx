@@ -10,6 +10,7 @@ const usuarioSchema = z.object({
   cpf: z.string(),
   telefone: z.string(),
   dataNasc: z.string(),
+  cargo: z.string(),
   cep: z.string(),
   rua: z.string(),
   numero: z.string(),
@@ -43,6 +44,7 @@ export default function CadastroPage() {
     cpf: string,
     telefone: string,
     dataNasc: string,
+    cargo: string,
     rua: string,
     numero: string,
     complemento: string,
@@ -64,7 +66,7 @@ export default function CadastroPage() {
         body: JSON.stringify({
           email, senha, 
           nome, cpf, 
-          telefone, dataNasc: dataNascStr,
+          telefone, dataNasc: dataNascStr, cargo,
           rua, numero,
           complemento, bairro,
           cidade, estado,
@@ -80,7 +82,7 @@ export default function CadastroPage() {
 
     const formData = new FormData(e.currentTarget);
     const dadosBrutos = Object.fromEntries(formData.entries());
-
+    console.log(dadosBrutos);
     const validacao = usuarioSchema.safeParse(dadosBrutos);
 
     if (!validacao.success) {
@@ -90,8 +92,10 @@ export default function CadastroPage() {
     }
     const dados = validacao.data;
 
+    console.log(dados.cargo)
+
     console.log("Dados prontos para envio:", dados);
-    criarUsuario(dados.email, dados.senha, dados.nome, dados.cpf, dados.telefone, dados.dataNasc, dados.rua, dados.numero, dados.complemento, dados.bairro, dados.cidade, dados.estado, dados.numero);
+    criarUsuario(dados.email, dados.senha, dados.nome, dados.cpf, dados.telefone, dados.dataNasc, dados.rua, dados.cargo, dados.numero, dados.complemento, dados.bairro, dados.cidade, dados.estado, dados.numero);
   };
 
   return (
@@ -184,6 +188,18 @@ export default function CadastroPage() {
               <input type="text" name="estado" id="estado" required maxLength={2} placeholder="SP" 
                 className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all uppercase" />
             </div>
+
+            <div className="flex md:col-span-7 mt-5 md:mt-0">
+              <div className="flex ml-11">
+                <input type="radio" name="cargo" id="cargo-user" value="user" className="mr-2" />
+                <label htmlFor="cargo-user" className="mb-1 font-medium text-sm">Sou Usuário</label>
+                
+              </div>  
+              <div className="flex ml-11">
+                <input type="radio" name="cargo" id="cargo-biblio" value="biblio" className="mr-2" />
+                <label htmlFor="cargo-biblio" className="mb-1 font-medium text-sm">Sou Bibliotecário</label>
+              </div>
+            </div>  
           </div>
 
           <button 

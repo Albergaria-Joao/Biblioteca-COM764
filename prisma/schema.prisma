@@ -21,7 +21,7 @@ model Usuario {
   cpf            String   @unique // Preferi usar CPF porque o RG vai ser substituído 
   dataNascimento DateTime
   telefone       String
-  status         String   @default("ATIVO")
+  status         String   @default("ESPERA")
   cargo          String   @default("USER")
 
   Endereco   Endereco @relation(fields: [enderecoId], references: [id]) // Coloco esse atributo do tipo Endereco pra criar a relação. O FK é o enderecoId

@@ -39,12 +39,13 @@ export async function POST(request: Request) {
           email: body.email,
           senha: await bcrypt.hash(body.senha, 10),
           cpf: body.cpf,
-          dataNascimento: body.dataNasc,
+          dataNascimento: new Date(body.dataNasc),
+          cargo: body.cargo,
           telefone: body.telefone,
           enderecoId: endereco.id
         },
       });
-      
+
       return usuario;
     });
     return NextResponse.json(novoUsuario, { status: 200 });
