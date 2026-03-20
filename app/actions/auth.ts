@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { signIn } from "@/auth";
 
 export async function logout() {
     const cookieStore = cookies(); // Pega os cookies

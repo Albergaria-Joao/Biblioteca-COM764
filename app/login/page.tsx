@@ -1,8 +1,9 @@
 "use client"
-
+import { signIn } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 
 import { z } from "zod";
+import { LoginButton } from "./components/LoginButton";
 const loginSchema = z.object({
   email: z.string(),
   senha: z.string(),
@@ -78,6 +79,8 @@ export default function LoginPage() {
                     Login
                 </button>
                 </form>
+
+                <LoginButton></LoginButton>
             </div>
         </div>
     );
