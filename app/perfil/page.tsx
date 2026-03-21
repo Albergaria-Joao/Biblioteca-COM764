@@ -21,14 +21,13 @@ type Usuario = {
 export default function PerfilPage() {
 
     const [usuario, setUsuario] = useState<Usuario | null>(null);
+    const [usuarioOriginal, setUsuarioOriginal] = useState<Usuario | null>(null);
     const [editavel, setEditavel] = useState(false);
 
     useEffect(() => {
         async function carregarUsuario() {
             try {
-                const response = await fetch('/api/usuarios/perfil', {
-                    method: "GET"
-                });
+                const response = await fetch('/api/usuarios/perfil');
 
                 if (!response.ok) {
                     console.error("Erro ao buscar perfil");
@@ -37,6 +36,7 @@ export default function PerfilPage() {
 
                 const data = await response.json();
                 setUsuario(data);
+                setUsuarioOriginal(data);
 
             } catch (error) {
                 console.error("Erro na requisição:", error);
@@ -46,27 +46,65 @@ export default function PerfilPage() {
         carregarUsuario();
     }, []);
 
-    //Criar função para passar os parametros e chamar o método POST da rota perfil
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        const formData = new FormData(e.currentTarget);
+        const dados = Object.fromEntries(formData.entries());
+
+        const response = await fetch("/api/usuarios/perfil", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dados),
+        });
+
+        if (!response.ok) {
+            alert("Erro ao salvar");
+            return;
+        }
+
+        const usuarioAtualizado: Usuario = {
+            ...usuario!,
+            nome: String(dados.nome ?? usuario!.nome),
+            telefone: String(dados.telefone ?? usuario!.telefone),
+            dataNascimento: dados.datanasc
+                ? String(dados.datanasc)
+                : usuario!.dataNascimento,
+            Endereco: {
+                rua: String(dados.rua ?? usuario!.Endereco.rua),
+                numero: String(dados.numero ?? usuario!.Endereco.numero),
+                bairro: String(dados.bairro ?? usuario!.Endereco.bairro),
+                cidade: String(dados.cidade ?? usuario!.Endereco.cidade),
+                estado: String(dados.estado ?? usuario!.Endereco.estado),
+                cep: String(dados.cep ?? usuario!.Endereco.cep),
+            },
+        };
+
+        setUsuario(usuarioAtualizado);
+        setUsuarioOriginal(usuarioAtualizado);
+        setEditavel(false);
     };
 
+    const handleCancelar = () => {
+        setUsuario(usuarioOriginal);
+        setEditavel(false);
+    };
 
-
-    // Enquanto carrega
     if (!usuario) {
         return <p className="p-6">Carregando...</p>;
     }
 
-    //Adicionar um form cubbrindo tudo isso, para lidar com o handleSubit
     return (
         <div className="min-h-screen bg-gray-100 p-6">
             <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl p-8">
 
                 <h1 className="text-2xl font-bold mb-6">Perfil</h1>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
+                <form
+                    key={editavel ? "editando" : "visualizando"}
+                    onSubmit={handleSubmit}
+                    className="space-y-8"
+                >
 
                     {/* Dados pessoais */}
                     <div>
@@ -77,21 +115,19 @@ export default function PerfilPage() {
                             <div>
                                 <label>Nome</label>
                                 <input
+                                    name="nome"
                                     className="border p-2 w-full rounded"
-                                    value={usuario.nome}
-                                    disabled={!editavel}
-                                    onChange={(e) =>
-                                        setUsuario({ ...usuario, nome: e.target.value })
-                                    }
+                                    defaultValue={usuario.nome}
+                                    readOnly={!editavel}
                                 />
                             </div>
 
                             <div>
                                 <label>Email</label>
                                 <input
+                                    name="email"
                                     className="border p-2 w-full rounded bg-gray-100"
-                                    value={usuario.email}
-                                    disabled
+                                    defaultValue={usuario.email}
                                     readOnly
                                 />
                             </div>
@@ -99,25 +135,21 @@ export default function PerfilPage() {
                             <div>
                                 <label>Telefone</label>
                                 <input
+                                    name="telefone"
                                     className="border p-2 w-full rounded"
-                                    value={usuario.telefone}
-                                    disabled={!editavel}
-                                    onChange={(e) =>
-                                        setUsuario({ ...usuario, telefone: e.target.value })
-                                    }
+                                    defaultValue={usuario.telefone}
+                                    readOnly={!editavel}
                                 />
                             </div>
 
                             <div>
                                 <label>Data nascimento</label>
                                 <input
+                                    name="datanasc"
                                     type="date"
                                     className="border p-2 w-full rounded"
-                                    value={usuario.dataNascimento?.split("T")[0] || ""}
-                                    disabled={!editavel}
-                                    onChange={(e) =>
-                                        setUsuario({ ...usuario, dataNascimento: e.target.value })
-                                    }
+                                    defaultValue={usuario.dataNascimento?.split("T")[0] || ""}
+                                    readOnly={!editavel}
                                 />
                             </div>
 
@@ -133,72 +165,60 @@ export default function PerfilPage() {
                             <div>
                                 <label>Rua</label>
                                 <input
+                                    name="rua"
                                     className="border p-2 w-full rounded"
-                                    value={usuario.Endereco.rua}
-                                    disabled={!editavel}
-                                    onChange={(e) =>
-                                        setUsuario({
-                                            ...usuario,
-                                            Endereco: {
-                                                ...usuario.Endereco,
-                                                rua: e.target.value
-                                            }
-                                        })
-                                    }
+                                    defaultValue={usuario.Endereco.rua}
+                                    readOnly={!editavel}
                                 />
                             </div>
 
                             <div>
                                 <label>Número</label>
                                 <input
+                                    name="numero"
                                     className="border p-2 w-full rounded"
-                                    value={usuario.Endereco.numero}
-                                    disabled={!editavel}
-                                    onChange={(e) =>
-                                        setUsuario({
-                                            ...usuario,
-                                            Endereco: {
-                                                ...usuario.Endereco,
-                                                numero: e.target.value
-                                            }
-                                        })
-                                    }
+                                    defaultValue={usuario.Endereco.numero}
+                                    readOnly={!editavel}
+                                />
+                            </div>
+
+                            <div>
+                                <label>Bairro</label>
+                                <input
+                                    name="bairro"
+                                    className="border p-2 w-full rounded"
+                                    defaultValue={usuario.Endereco.bairro}
+                                    readOnly={!editavel}
                                 />
                             </div>
 
                             <div>
                                 <label>Cidade</label>
                                 <input
+                                    name="cidade"
                                     className="border p-2 w-full rounded"
-                                    value={usuario.Endereco.cidade}
-                                    disabled={!editavel}
-                                    onChange={(e) =>
-                                        setUsuario({
-                                            ...usuario,
-                                            Endereco: {
-                                                ...usuario.Endereco,
-                                                cidade: e.target.value
-                                            }
-                                        })
-                                    }
+                                    defaultValue={usuario.Endereco.cidade}
+                                    readOnly={!editavel}
                                 />
                             </div>
 
                             <div>
                                 <label>Estado</label>
                                 <input
+                                    name="estado"
                                     className="border p-2 w-full rounded"
-                                    value={usuario.Endereco.estado}
-                                    disabled={!editavel}
-                                    onChange={(e) =>
-                                        setUsuario({
-                                            ...usuario,
-                                            Endereco: {
-                                                ...usuario.Endereco,
-                                                estado: e.target.value
-                                            }
-                                        })
-                                    }
+                                    defaultValue={usuario.Endereco.estado}
+                                    readOnly={!editavel}
+                                />
+                            </div>
+
+                            <div>
+                                <label>CEP</label>
+                                <input
+                                    name="cep"
+                                    className="border p-2 w-full rounded"
+                                    defaultValue={usuario.Endereco.cep}
+                                    readOnly={!editavel}
                                 />
                             </div>
 
@@ -220,7 +240,7 @@ export default function PerfilPage() {
                             <>
                                 <button
                                     type="button"
-                                    onClick={() => setEditavel(false)}
+                                    onClick={handleCancelar}
                                     className="bg-gray-400 text-white px-4 py-2 rounded"
                                 >
                                     Cancelar

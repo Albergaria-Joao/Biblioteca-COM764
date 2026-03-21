@@ -47,7 +47,7 @@ export async function GET() {
         if (!usuario) {
             return NextResponse.json(
                 { error: "Usuario não encontrado" },
-                { status: 401 }
+                { status: 404 }
             )
         }
 
@@ -67,70 +67,79 @@ export async function GET() {
 
 }
 
-export async function POST(
-    email: string,
-    nome: string,
-    telefone: string,
-    dataNasc: Date,
-    rua: string,
-    numero: string,
-    complemento: string,
-    bairro: string,
-    cidade: string,
-    estado: string,
-    cep: string,
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
 
-) {
+        const {
+            email,
+            nome,
+            telefone,
+            datanasc,
+            rua,
+            numero,
+            complemento,
+            bairro,
+            cidade,
+            estado,
+            cep
+        } = body;
 
-    //Buscando o id do user utilizanod a pagina
-    const cookieStorage = cookies();
-    const userId = (await cookieStorage).get("userId")?.value;
+        const cookieStorage = cookies();
+        const userId = (await cookieStorage).get("userId")?.value;
 
-    //Verifica autenticação
-    if (!userId) {
+        if (!userId) {
+            return NextResponse.json(
+                { error: "Usuário não autenticado" },
+                { status: 401 }
+            );
+        }
+
+        // Atualiza usuário
+        await prisma.usuario.update({
+            where: { id: userId },
+            data: {
+                email,
+                nome,
+                telefone,
+                dataNascimento: datanasc ? new Date(datanasc) : undefined
+            },
+        });
+
+        const usuario = await prisma.usuario.findUnique({
+            where: { id: userId },
+            select: { enderecoId: true },
+        });
+
+        if (!usuario?.enderecoId) {
+            return NextResponse.json(
+                { error: "Endereço não encontrado" },
+                { status: 404 }
+            );
+        }
+
+        //Atualiza endereço
+        await prisma.endereco.update({
+            where: { id: usuario.enderecoId },
+            data: {
+                rua,
+                numero,
+                complemento,
+                bairro,
+                cidade,
+                estado,
+                cep,
+            },
+        });
+
+        //resposta de sucesso
+        return NextResponse.json({ success: true });
+
+    } catch (error) {
+        console.error(error);
         return NextResponse.json(
-            { error: "Usuário não autenticado" },
-            { status: 401 }
+            { error: "Erro interno" },
+            { status: 500 }
         );
     }
-
-    prisma.usuario.update({
-        where: {
-            id: userId,
-        },
-        data: {
-            email: email,
-            nome: nome,
-            telefone: telefone,
-            dataNascimento: dataNasc,
-        },
-    });
-
-    const usuario = await prisma.usuario.findUnique({
-        where: { id: userId },
-        select: { enderecoId: true },
-    });
-
-    if (!usuario?.enderecoId) {
-        return NextResponse.json(
-            { error: "Endereço não encontrado" },
-            { status: 404 }
-        );
-    }
-
-    prisma.endereco.update({
-        where: {
-            id: usuario.enderecoId,
-        },
-        data: {
-            rua: rua,
-            numero: numero,
-            complemento: complemento,
-            bairro: bairro,
-            cidade: cidade,
-            estado: estado,
-            cep: cep,
-        },
-    });
-
 }
