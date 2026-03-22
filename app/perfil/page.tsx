@@ -27,7 +27,7 @@ export default function PerfilPage() {
     useEffect(() => {
         async function carregarUsuario() {
             try {
-                const response = await fetch('/api/usuarios/perfil');
+                const response = await fetch('/api/usuarios/perfil', { method:"GET" });
 
                 if (!response.ok) {
                     console.error("Erro ao buscar perfil");

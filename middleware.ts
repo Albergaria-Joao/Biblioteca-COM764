@@ -5,14 +5,14 @@ const SECRET = new TextEncoder().encode(process.env.JWT_SECRET); // codifica o s
 // Middleware ==> cada requisição vai passar por ele
 export async function middleware(request: NextRequest) {
     const token = request.cookies.get("token")?.value;
-
+    console.log(request.cookies.get("userId"))
     if(!token) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
     try {
         await jwtVerify(token, SECRET);
-        console.log(token)
+        console.log("TOKEN", token)
         return NextResponse.next(); // Passa para o destino
 
         // Adicionar verificação de cargo depois

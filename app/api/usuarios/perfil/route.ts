@@ -1,17 +1,25 @@
 import prisma from "@/lib/prisma";
 import { error } from "console";
+import { request } from "http";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { jwtVerify } from "jose";
+
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function GET() {
     try {
+        const cookieStorage = cookies()
+        const token = (await cookieStorage).get("token")?.value;
 
-        //Buscando o id do user utilizanod a pagina
-        const cookieStorage = cookies();
-        const userId = (await cookieStorage).get("userId")?.value;
+        if (!token) return null;
+        // Precisa pegar o token e descriptografar
+        const { payload } = await jwtVerify(token, SECRET);
 
-        //Verifica autenticação
+        const userId = payload.userId as string;
+
         if (!userId) {
+            console.log("PROBLEMA AQUI")
             return NextResponse.json(
                 { error: "Usuário não autenticado" },
                 { status: 401 }
@@ -85,8 +93,14 @@ export async function POST(req: Request) {
             cep
         } = body;
 
-        const cookieStorage = cookies();
-        const userId = (await cookieStorage).get("userId")?.value;
+        const cookieStorage = cookies()
+        const token = (await cookieStorage).get("token")?.value;
+
+        if (!token) return null;
+        // Precisa pegar o token e descriptografar
+        const { payload } = await jwtVerify(token, SECRET);
+
+        const userId = payload.userId as string;
 
         if (!userId) {
             return NextResponse.json(
