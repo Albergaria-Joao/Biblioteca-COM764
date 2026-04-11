@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 
 import { z } from "zod";
 import { LoginButton } from "./components/LoginButton";
+import { useState } from "react";
 const loginSchema = z.object({
   email: z.string(),
   senha: z.string(),
@@ -11,22 +12,27 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
 
+    const [carregando, setCarregando] = useState(false);
+
     const router = useRouter();
     async function efetuarLogin(
         email: string,
         senha: string,
     ) {
-        const response = await fetch("/api/usuarios/login", {
-            method:'POST',
-            body: JSON.stringify({
-                email, senha
-            })
+        setCarregando(true);
+
+        const result = await signIn("credentials", {
+            email,
+            password: senha,
+            redirect: false, // Impedir o refresh automático para tratar o erro com alert
         });
-        const data = await response.json();
-        if (data.erro) {
-            alert("Usuário ou senha incorretos");
-        } else if (data.login == true) {
+
+        if (result?.error) {
+            alert("E-mail ou senha incorretos.");
+            setCarregando(false);
+        } else {
             router.push("/usuarios");
+            router.refresh(); // Garante que o servidor perceba a sessão nova
         }
     }
 
@@ -45,6 +51,8 @@ export default function LoginPage() {
         }
         // Valida no Zod
         const dados = validacao.data;
+        
+        
         efetuarLogin(dados.email, dados.senha);
     };
 

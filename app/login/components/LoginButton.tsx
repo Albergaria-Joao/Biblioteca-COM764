@@ -8,7 +8,7 @@ export function LoginButton() {
 
     const handleLogin = async () => {
         setIsPending(true);
-        await signIn("google", { callbackUrl: "/dashboard" });
+        await signIn("google", { callbackUrl: "/usuarios" });
        
     }
     return (

@@ -3,28 +3,21 @@ import { error } from "console";
 import { request } from "http";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { jwtVerify } from "jose";
-
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+import { auth } from "@/auth";
 
 export async function GET() {
     try {
-        const cookieStorage = cookies()
-        const token = (await cookieStorage).get("token")?.value;
+        const session = await auth(); // O próprio nextAuth vai pegar o token dos cookies, validar ele, e retornar os dados do usuário (payload) caso o token seja válido
 
-        if (!token) return null;
-        // Precisa pegar o token e descriptografar
-        const { payload } = await jwtVerify(token, SECRET);
-
-        const userId = payload.userId as string;
-
-        if (!userId) {
-            console.log("PROBLEMA AQUI")
+        if (!session || !session.user) {
             return NextResponse.json(
-                { error: "Usuário não autenticado" },
-                { status: 401 }
+            { error: "Usuário não autenticado" },
+            { status: 401 }
             );
         }
+
+        const userId = session.user.id;
+
 
         //Busca no banco
         const usuario = await prisma.usuario.findUnique({

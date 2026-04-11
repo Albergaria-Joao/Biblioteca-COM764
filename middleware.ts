@@ -1,26 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+// middleware.ts
+import NextAuth from "next-auth";
+import authConfig from "./auth.config";
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET); // codifica o secret em bytes
-// Middleware ==> cada requisição vai passar por ele
-export async function middleware(request: NextRequest) {
-    const token = request.cookies.get("token")?.value;
-    console.log(request.cookies.get("userId"))
-    if(!token) {
-        return NextResponse.redirect(new URL("/login", request.url));
-    }
+// Instância do NextAuth para o middleware
+const { auth } = NextAuth(authConfig);
 
-    try {
-        await jwtVerify(token, SECRET);
-        console.log("TOKEN", token)
-        return NextResponse.next(); // Passa para o destino
+export default auth((req) => {
+  const isLogged = !!req.auth;
+  
+  const { nextUrl } = req;
+  console.log("Middleware rodando para:", nextUrl.pathname, "Usuário logado?", isLogged);
 
-        // Adicionar verificação de cargo depois
-    } catch (error) {
-        return NextResponse.redirect(new URL("/login", request.url));
-    }
-}
+  if (!isLogged && (nextUrl.pathname.startsWith("/usuarios") || nextUrl.pathname.startsWith("/perfil"))) {
+    return Response.redirect(new URL("/login", nextUrl));
+  }
+});
 
 export const config = {
-    matcher: ["/usuarios/:path*", "/perfil/:path*"] // Onde o middleware vai ficar de olho
-}
+  matcher: ["/usuarios/:path*", "/perfil/:path*"]
+};
