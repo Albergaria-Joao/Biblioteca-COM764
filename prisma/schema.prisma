@@ -50,7 +50,7 @@ model Acervo {
   editora       String
   edicao        String
   anoPublicacao Int
-  descricao     String
+  genero        String
   unidades      Int
   reservas      Reservas[]
 }

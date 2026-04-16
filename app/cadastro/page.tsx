@@ -73,7 +73,7 @@ export default function CadastroPage() {
           cep
         })
     });
-
+    
     // Adicionar validações e retornos de dados incorretos aqui quando fizer
   }
 
@@ -95,7 +95,7 @@ export default function CadastroPage() {
     console.log(dados.cargo)
 
     console.log("Dados prontos para envio:", dados);
-    criarUsuario(dados.email, dados.senha, dados.nome, dados.cpf, dados.telefone, dados.dataNasc, dados.rua, dados.cargo, dados.numero, dados.complemento, dados.bairro, dados.cidade, dados.estado, dados.numero);
+    criarUsuario(dados.email, dados.senha, dados.nome, dados.cpf, dados.telefone, dados.dataNasc, dados.cargo, dados.rua, dados.numero, dados.complemento, dados.bairro, dados.cidade, dados.estado, dados.numero);
   };
 
   return (
@@ -191,12 +191,12 @@ export default function CadastroPage() {
 
             <div className="flex md:col-span-7 mt-5 md:mt-0">
               <div className="flex ml-11">
-                <input type="radio" name="cargo" id="cargo-user" value="user" className="mr-2" />
+                <input type="radio" name="cargo" id="cargo-user" value="USER" className="mr-2" />
                 <label htmlFor="cargo-user" className="mb-1 font-medium text-sm">Sou Usuário</label>
                 
               </div>  
               <div className="flex ml-11">
-                <input type="radio" name="cargo" id="cargo-biblio" value="biblio" className="mr-2" />
+                <input type="radio" name="cargo" id="cargo-biblio" value="BIBLIO" className="mr-2" />
                 <label htmlFor="cargo-biblio" className="mb-1 font-medium text-sm">Sou Bibliotecário</label>
               </div>
             </div>  
