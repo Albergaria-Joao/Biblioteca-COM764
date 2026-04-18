@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { logout } from "../actions/auth";
+import Link from 'next/link'; 
 
 type Livro= {
   id: string,
@@ -42,18 +43,6 @@ export default function AcervoPage() {
         <h1 className="text-2xl font-bold text-gray-800">
           Lista de Livros
         </h1>
-
-        {/* BOTÃO PERFIL */}
-        <button
-          onClick={() => router.push("/perfil")}
-          className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 hover:border-blue-600 transition"
-        >
-          <img
-            src="/user.png"
-            alt="Foto do usuário"
-            className="w-full h-full object-cover"
-          />
-        </button>
       </div>
 
       {/* CARD TABELA */}
@@ -92,6 +81,7 @@ export default function AcervoPage() {
                   <td className="px-4 py-3">{livro.edicao}</td>
                   <td className="px-4 py-3">{livro.genero}</td>
                   <td className="px-4 py-3">{livro.unidades}</td>
+                  <td className="px-4 py-3"><button className="bg-blue-500 text-white py-1 px-3 rounded-md"><Link href={`/acervo/editar?oid=${livro.id}`}>Editar</Link></button></td>
                 </tr>
               ))}
             </tbody>

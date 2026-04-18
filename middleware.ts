@@ -11,11 +11,21 @@ export default auth((req) => {
   const { nextUrl } = req;
   console.log("Middleware rodando para:", nextUrl.pathname, "Usuário logado?", isLogged);
 
-  if (!isLogged && (nextUrl.pathname.startsWith("/usuarios") || nextUrl.pathname.startsWith("/perfil"))) {
+  if (!isLogged && (nextUrl.pathname !== "/login" && nextUrl.pathname !== "/cadastro")) {
     return Response.redirect(new URL("/login", nextUrl));
   }
+
+  if (isLogged && (nextUrl.pathname === "/login" || nextUrl.pathname === "/cadastro")) {
+    return Response.redirect(new URL("/acervo", nextUrl));
+  }
+  
+  if (isLogged && (nextUrl.pathname === "/")) {
+      return Response.redirect(new URL("/acervo", nextUrl));
+  }
+
+  
 });
 
 export const config = {
-  matcher: ["/usuarios/:path*", "/perfil/:path*"]
+  matcher: ["/usuarios/:path*", "/perfil/:path*", "/login", "/cadastro", "/acervo/:path*", "/"],
 };

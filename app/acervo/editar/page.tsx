@@ -1,7 +1,8 @@
 "use client";
 import { z } from "zod";
-import { useState } from "react";
+import { use, useState, useEffect } from "react";
 import AcervoForm from "../components/AcervoForm";
+import { useSearchParams } from 'next/navigation'
 
 type LivroCadastro = {
   isbn: string,
@@ -25,7 +26,7 @@ const livroSchema = z.object({
   unidades: z.coerce.number().min(0)
 });
 
-export default function AdicionarAcervoPage() {
+export default function EditarAcervoPage() {
 
     const [livroAtual, setLivroAtual] = useState<LivroCadastro>({
         titulo: "",
@@ -38,10 +39,29 @@ export default function AdicionarAcervoPage() {
         unidades: 1,
     });
 
-    const criarLivro = async  (livro: LivroCadastro) => {
-        const response = await fetch("/api/acervo", {
-            method:'POST',
-            body: JSON.stringify({livro: livro})
+    const [livroPrevio, setLivroPrevio] = useState<LivroCadastro | null>(null);
+
+
+    const searchParams = useSearchParams()
+    const oid = searchParams.get('oid')
+
+    useEffect(() => {
+        async function carregarLivro() {
+            const response = await fetch(`/api/acervo/${oid}`, {
+                method: "GET"
+            });
+            const data = await response.json();
+            setLivroAtual(data);
+            setLivroPrevio(data);
+            console.log(data);
+        }
+        carregarLivro();
+    }, []);
+
+    const editarLivro = async  (livro: LivroCadastro) => {
+        const response = await fetch(`/api/acervo/${oid}`, {
+            method:'PUT',
+            body: JSON.stringify({livro: livro, livroPrevio: livroPrevio})
         });
         return response;
     }
@@ -73,19 +93,19 @@ export default function AdicionarAcervoPage() {
             unidades: dados.unidades,    
         }
 
-        const res = await criarLivro(novoLivro);
+        const res = await editarLivro(novoLivro);
         const resJson = await res.json();
         if (resJson?.error) {
             alert("ERRO NA CRIAÇÃO: " + resJson.error);
         } else {
-            alert("LIVRO ADICIONADO");
+            alert("LIVRO EDITADO");
         }
     }
 
     return (
         <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Adicionar Item ao Acervo</h1>
-            <AcervoForm tipo="adicionar" livroAtual={livroAtual} setLivroAtual={setLivroAtual} handleSubmit={handleSubmit} />
+            <h1 className="text-2xl font-bold mb-4">Editar livro</h1>
+            <AcervoForm tipo="editar" livroAtual={livroAtual} setLivroAtual={setLivroAtual} handleSubmit={handleSubmit} />
         </div>
     );
 }
