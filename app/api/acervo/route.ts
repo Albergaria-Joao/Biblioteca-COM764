@@ -18,17 +18,20 @@ export async function GET() {
 
     // Funciona que nem um select do SQL. Você escolhe as colunas e um limite (take)
     const acervo = await prisma.acervo.findMany({
-      select: {
-        id: true,
-        isbn: true,
-        titulo: true,
-        autor: true,
-        editora: true,
-        edicao: true,
-        anoPublicacao: true,
-        genero: true,
-        unidades: true,
-      },
+        where: {
+            excluido: false, // Filtra apenas os livros não excluidoss
+        },
+        select: {
+            id: true,
+            isbn: true,
+            titulo: true,
+            autor: true,
+            editora: true,
+            edicao: true,
+            anoPublicacao: true,
+            genero: true,
+            unidades: true,
+        },
     });
 
     return NextResponse.json(acervo, { status: 200 });

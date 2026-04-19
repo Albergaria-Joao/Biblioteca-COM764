@@ -35,6 +35,20 @@ export default function AcervoPage() {
     carregarLivros();
   }, []);
 
+  const excluirLivro = async (id: string) => {
+    const confirmacao = window.confirm("Tem certeza que deseja excluir este livro?");
+    if (!confirmacao) return;
+    const response = await fetch(`/api/acervo/${id}`, {
+      method: "DELETE"
+    });
+    if (response.ok) {
+      setLivros(prev => prev.filter(livro => livro.id !== id)); // Remove o livro da lista sem precisar recarregar
+    }
+    else {
+        alert("ERRO NA CRIAÇÃO: " + (await response.json()).error);
+    }
+  }
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <button onClick={logout} className="p-1.5 pr-3 pl-3 bg-red-500 text-white rounded-xl cursor-pointer">Sair</button> {/*Teste de botão de logout com server action*/}
@@ -82,6 +96,7 @@ export default function AcervoPage() {
                   <td className="px-4 py-3">{livro.genero}</td>
                   <td className="px-4 py-3">{livro.unidades}</td>
                   <td className="px-4 py-3"><button className="bg-blue-500 text-white py-1 px-3 rounded-md"><Link href={`/acervo/editar?oid=${livro.id}`}>Editar</Link></button></td>
+                  <td className="px-4 py-3"><button className="bg-red-500 text-white py-1 px-3 rounded-md" onClick={() => excluirLivro(livro.id)}>Excluir</button></td>
                 </tr>
               ))}
             </tbody>

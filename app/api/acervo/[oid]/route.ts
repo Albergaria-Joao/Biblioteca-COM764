@@ -105,3 +105,44 @@ export async function PUT(request: Request, { params }: { params: Promise<{ oid:
         );
     }
 }
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ oid: string }> }) {
+    const { oid } = await params;
+    if (!oid) {
+        return NextResponse.json(
+            { error: "ID do livro não fornecido" },
+            { status: 400 }
+        );
+    }
+
+    try {
+        const session = await auth(); // O próprio nextAuth vai pegar o token dos cookies, validar ele, e retornar os dados do usuário (payload) caso o token seja válido
+        
+        if (!session || !session.user || session.user.cargo !== "BIBLIO") {
+            console.log(session?.user.cargo);
+            return NextResponse.json(
+            { error: "Usuário não autenticado" },
+            { status: 401 }
+            );
+        }
+
+        const livroExcluido = await prisma.acervo.update({
+            where: {
+                id: oid.toString(),
+            },
+            data: {
+                excluido: true,
+            }
+        });
+
+        console.log("Livro excluído:", livroExcluido);
+        return NextResponse.json(livroExcluido, { status: 200 });
+    }
+    catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            { status: 500 }
+        );
+    }
+
+}
