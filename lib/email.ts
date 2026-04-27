@@ -10,7 +10,6 @@ export async function enviarEmailCadastro(usuario: any) {
   });
 
   const linkAprovar = `http://localhost:3000/aprovar/${usuario.id}`;
-  const linkRejeitar = `http://localhost:3000/rejeitar/${usuario.id}`;
 
   await transporter.sendMail({
     from: `"Sistema Biblioteca" <${process.env.EMAIL_USER}>`,
@@ -35,13 +34,9 @@ export async function enviarEmailCadastro(usuario: any) {
           <p style="text-align: center; margin-top: 30px;">
             <a href="${linkAprovar}" 
                style="background-color: #28a745; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; margin-right: 10px; display: inline-block;">
-              Aprovar
+              Verificar aprovação
             </a>
 
-            <a href="${linkRejeitar}" 
-               style="background-color: #dc3545; color: white; padding: 12px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
-               Rejeitar
-            </a>
           </p>
 
           <hr style="margin: 30px 0;" />
