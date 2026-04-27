@@ -14,8 +14,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (account?.provider === "google") {
         if (!profile?.email_verified) return false;
 
+
+
+        //Deve fazer alerta de que usuer nãe existe ou ainda não foi aprovado
         const usuarioExiste = await prisma.usuario.findUnique({
-          where: { email: user.email! },
+          where: { email: user.email! , status:{not: "ESPERA"}},
         });
 
         return !!usuarioExiste; // Retorna true se existe, false se não
@@ -58,7 +61,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.usuario.findUnique({
-          where: { email: credentials.email as string },
+          where: { email: credentials.email as string, status:{not: "ESPERA"} },
         });
 
         if (!user || !user.senha) return null;
