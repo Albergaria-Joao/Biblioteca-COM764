@@ -1,5 +1,15 @@
+"use client"
+
+import { z } from "zod";
+import { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation'
 // Depois, ver de colocar alguma pasta só com os tipos (ex: types/Livro.ts) e importar de lá, pra evitar repetição
-type Livro = {
+type AcervoFormProps = {
+  tipo: "adicionar" | "editar";
+};
+
+
+type LivroCadastro = {
   isbn: string,
   titulo: string,
   autor: string,
@@ -10,19 +20,104 @@ type Livro = {
   unidades: number,
 }
 
-type AcervoFormProps = {
-  tipo: "adicionar" | "editar";
-  livroAtual: Livro;
-  setLivroAtual: React.Dispatch<React.SetStateAction<Livro>>;
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-};
+const livroSchema = z.object({
+  titulo: z.string(),
+  isbn: z.string(),
+  autor: z.string(),
+  editora: z.string(),
+  edicao: z.string().optional(),
+  anoPublicacao: z.coerce.number(),
+  genero: z.string(),
+  unidades: z.coerce.number().min(0)
+});
 
-export default function AcervoForm({
-    tipo,
-    livroAtual,
-    setLivroAtual,
-    handleSubmit
-}: AcervoFormProps) {
+
+export default function AcervoForm({ tipo }: AcervoFormProps) {
+
+    const [livroAtual, setLivroAtual] = useState<LivroCadastro>({
+        titulo: "",
+        isbn: "",
+        autor: "",
+        editora: "",
+        edicao: "",
+        anoPublicacao: 0,
+        genero: "",
+        unidades: 1,
+    });
+
+    const [livroPrevio, setLivroPrevio] = useState<LivroCadastro | null>(null);
+
+
+    const searchParams = useSearchParams()
+    const oid = searchParams.get('oid')
+
+    useEffect(() => {
+        async function carregarLivro() {
+            const response = await fetch(`/api/acervo/${oid}`, {
+                method: "GET"
+            });
+            const data = await response.json();
+            setLivroAtual(data);
+            setLivroPrevio(data);
+            console.log(data);
+        }
+        carregarLivro();
+    }, []);
+
+    const editarLivro = async (livro: LivroCadastro) => {
+        
+        if (!livroPrevio) {
+            const response = await fetch(`/api/acervo/${oid}`, {
+                method:'POST',
+                body: JSON.stringify({livro: livro})
+            });
+            return response;
+        }
+
+        const response = await fetch(`/api/acervo/${oid}`, {
+            method:'PUT',
+            body: JSON.stringify({livro: livro, livroPrevio: livroPrevio})
+        });
+        return response;
+    }
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        //const formData = new FormData(e.currentTarget);
+        //const dadosBrutos = Object.fromEntries(formData.entries());
+        const dadosBrutos = livroAtual;
+        console.log(dadosBrutos);
+        const validacao = livroSchema.safeParse(dadosBrutos);
+
+        if (!validacao.success) {
+            console.error(validacao.error.format());
+            alert("Há erros de formato nos dados");
+            return;
+        }
+        const dados = validacao.data;
+        console.log("Dados validados:", dados);
+        const novoLivro: LivroCadastro = {
+            titulo: dados.titulo, 
+            isbn: dados.isbn, 
+            autor: dados.autor, 
+            editora: dados.editora, 
+            edicao: dados.edicao, 
+            anoPublicacao: dados.anoPublicacao, 
+            genero: dados.genero,
+            unidades: dados.unidades,    
+        }
+
+        const res = await editarLivro(novoLivro);
+        const resJson = await res.json();
+        if (resJson?.error) {
+            alert("ERRO NA CRIAÇÃO: " + resJson.error);
+        } else {
+            alert("LIVRO EDITADO");
+        }
+    }
+
+
     return (
     <form onSubmit={handleSubmit} onChange={(e) => {
         const { name, value } = e.target;

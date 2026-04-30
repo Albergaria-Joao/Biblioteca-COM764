@@ -17,26 +17,26 @@ type Livro = {
 }
 
 interface TabelaProps {
-	//livros: Livro[];
+	livros: Livro[];
 	cargoUser: string;
 }
 
-export default function AcervoTabela({ cargoUser }: TabelaProps ) {
-  const [livros, setLivros] = useState<Livro[]>([]);
+export default function AcervoTabela({ cargoUser, livros }: TabelaProps ) {
+  //const [livros, setLivros] = useState<Livro[]>([]);
 
   const router = useRouter();
-  useEffect(() => {
-    async function carregarLivros() {
-      const response = await fetch("/api/acervo", {
-        method: "GET"
-      });
+  // useEffect(() => {
+  //   async function carregarLivros() {
+  //     const response = await fetch("/api/acervo", {
+  //       method: "GET"
+  //     });
 
-      const data = await response.json();
-      setLivros(data);
-    }
+  //     const data = await response.json();
+  //     setLivros(data);
+  //   }
 
-    carregarLivros();
-  }, []);
+  //   carregarLivros();
+  // }, []);
 
   
 
@@ -95,7 +95,12 @@ export default function AcervoTabela({ cargoUser }: TabelaProps ) {
                     <td className="px-4 py-3"><button className="bg-blue-500 text-white py-1 px-3 rounded-md"><Link href={`/acervo/editar?oid=${livro.id}`}>Editar</Link></button></td>
                     <td className="px-4 py-3"><button className="bg-red-500 text-white py-1 px-3 rounded-md" onClick={() => excluirLivro(livro.id)}>Excluir</button></td>
                   </>
-                  )}
+									)}
+									{cargoUser === "USER" && (
+										<>
+											<td className="px-4 py-3"><button className="bg-blue-500 text-white py-1 px-3 rounded-md"><Link href={`/acervo/reservar?oid=${livro.id}`}>Editar</Link></button></td>
+										</>
+									)}
                   </tr>
               ))}
             </tbody>

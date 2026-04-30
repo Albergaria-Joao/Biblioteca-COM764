@@ -2,6 +2,7 @@
 import { logout } from "../actions/auth";
 import { auth } from '@/auth';
 import AcervoTabela from "./components/AcervoTabela";
+import { prisma } from '@/lib/prisma';
 
 export default async function AcervoPage() {
 
@@ -9,7 +10,26 @@ export default async function AcervoPage() {
   if (!session) {
     return null;
   }
-  const cargoUser = session.user.cargo
+  const cargoUser = session.user.cargo;
+
+
+  const livros = await prisma.acervo.findMany({
+      where: {
+          excluido: false, // Filtra apenas os livros não excluidoss
+      },
+      select: {
+          id: true,
+          isbn: true,
+          titulo: true,
+          autor: true,
+          editora: true,
+          edicao: true,
+          anoPublicacao: true,
+          genero: true,
+          unidades: true,
+      },
+  });
+
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -20,7 +40,7 @@ export default async function AcervoPage() {
           Lista de Livros
         </h1>
       </div>
-      <AcervoTabela cargoUser={cargoUser} />
+      <AcervoTabela cargoUser={cargoUser} livros={livros} />
     </div>
   );
 }
