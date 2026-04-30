@@ -11,15 +11,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     // Só entra Google se o e-mail estiver no banco previamente cadastrado
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
+      if (account?.provider !== "credentials") {
         if (!profile?.email_verified) return false;
-
-
-
+        if (!user.email) return false;
         //Deve fazer alerta de que usuer nãe existe ou ainda não foi aprovado
         const usuarioExiste = await prisma.usuario.findUnique({
-          where: { email: user.email! , status:{not: "ESPERA"}},
+          where: { email: user.email},
         });
+
+        if (!usuarioExiste) {
+          await prisma.usuario.create({
+            data: {
+              email: user.email,
+              nome: user.name ?? "Usuário",
+              status: "ESPERA", // Ele entra em espera até completar o perfil
+              cargo: "USER",
+            },
+          });
+        }
 
         return !!usuarioExiste; // Retorna true se existe, false se não
       }

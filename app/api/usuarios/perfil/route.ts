@@ -18,7 +18,6 @@ export async function GET() {
 
         const userId = session.user.id;
 
-
         //Busca no banco
         const usuario = await prisma.usuario.findUnique({
             where: {
@@ -31,19 +30,41 @@ export async function GET() {
                 cpf: true,
                 telefone: true,
                 dataNascimento: true,
-                Endereco: {
-                    select: {
-                        rua: true,
-                        numero: true,
-                        bairro: true,
-                        cidade: true,
-                        estado: true,
-                        cep: true,
-                    },
-                },
             },
         });
 
+        const endereco = await prisma.endereco.findUnique({
+            where: {
+                usuarioId: userId,
+            },
+            select: {
+                rua: true,
+                numero: true,
+                bairro: true,
+                cidade: true,
+                estado: true,
+                cep: true,
+            },
+        })
+
+        if (!usuario) return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
+
+        const userObject = {
+            id: usuario.id,
+            nome: usuario.nome,
+            email: usuario.email,
+            cpf: usuario.cpf,
+            telefone: usuario.telefone,
+            dataNascimento: usuario.dataNascimento,
+            endereco: {
+                rua: endereco?.rua,
+                numero: endereco?.numero,
+                bairro: endereco?.bairro,
+                cidade: endereco?.cidade,
+                estado: endereco?.estado,
+                cep: endereco?.cep,
+            }
+        }
         //Validação da existencia do usuario no banco
         if (!usuario) {
             return NextResponse.json(
@@ -53,7 +74,7 @@ export async function GET() {
         }
 
         //Sucesso na busca por user especifíco
-        return NextResponse.json(usuario);
+        return NextResponse.json(userObject);
 
     } catch (error) {
         console.error("Erro ao buscar perfil:", error);
@@ -85,22 +106,23 @@ export async function POST(req: Request) {
             estado,
             cep
         } = body;
+        const session = await auth(); // O próprio nextAuth vai pegar o token dos cookies, validar ele, e retornar os dados do usuário (payload) caso o token seja válido
 
-        const cookieStorage = cookies()
-        const token = (await cookieStorage).get("token")?.value;
+        if (!session || !session.user) {
+            return NextResponse.json(
+            { error: "Usuário não autenticado" },
+            { status: 401 }
+            );
+        }
 
-        if (!token) return null;
-        // Precisa pegar o token e descriptografar
-        const { payload } = await jwtVerify(token, SECRET);
-
-        const userId = payload.userId as string;
-
+        const userId = session.user.id;
         if (!userId) {
             return NextResponse.json(
                 { error: "Usuário não autenticado" },
                 { status: 401 }
             );
         }
+
 
         // Atualiza usuário
         await prisma.usuario.update({
@@ -113,21 +135,25 @@ export async function POST(req: Request) {
             },
         });
 
-        const usuario = await prisma.usuario.findUnique({
-            where: { id: userId },
-            select: { enderecoId: true },
+        const endereco = await prisma.endereco.findUnique({
+            where: { usuarioId: userId },
+            select: { id: true },
         });
 
-        if (!usuario?.enderecoId) {
-            return NextResponse.json(
-                { error: "Endereço não encontrado" },
-                { status: 404 }
-            );
+        if (!endereco) {
+            return NextResponse.json({ success: true });
         }
+
+        // if (!usuario?.enderecoId) {
+        //     return NextResponse.json(
+        //         { error: "Endereço não encontrado" },
+        //         { status: 404 }
+        //     );
+        // }
 
         //Atualiza endereço
         await prisma.endereco.update({
-            where: { id: usuario.enderecoId },
+            where: { id: endereco.id },
             data: {
                 rua,
                 numero,

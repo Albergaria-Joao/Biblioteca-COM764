@@ -8,7 +8,7 @@ type Usuario = {
     cpf: string
     telefone: string
     dataNascimento: string
-    Endereco: {
+    endereco: {
         rua: string
         numero: string
         bairro: string
@@ -35,6 +35,7 @@ export default function PerfilPage() {
                 }
 
                 const data = await response.json();
+                console.log(data);
                 setUsuario(data);
                 setUsuarioOriginal(data);
 
@@ -70,13 +71,13 @@ export default function PerfilPage() {
             dataNascimento: dados.datanasc
                 ? String(dados.datanasc)
                 : usuario!.dataNascimento,
-            Endereco: {
-                rua: String(dados.rua ?? usuario!.Endereco.rua),
-                numero: String(dados.numero ?? usuario!.Endereco.numero),
-                bairro: String(dados.bairro ?? usuario!.Endereco.bairro),
-                cidade: String(dados.cidade ?? usuario!.Endereco.cidade),
-                estado: String(dados.estado ?? usuario!.Endereco.estado),
-                cep: String(dados.cep ?? usuario!.Endereco.cep),
+            endereco: {
+                rua: String(dados.rua ?? usuario!.endereco.rua),
+                numero: String(dados.numero ?? usuario!.endereco.numero),
+                bairro: String(dados.bairro ?? usuario!.endereco.bairro),
+                cidade: String(dados.cidade ?? usuario!.endereco.cidade),
+                estado: String(dados.estado ?? usuario!.endereco.estado),
+                cep: String(dados.cep ?? usuario!.endereco.cep),
             },
         };
 
@@ -167,7 +168,7 @@ export default function PerfilPage() {
                                 <input
                                     name="rua"
                                     className="border p-2 w-full rounded"
-                                    defaultValue={usuario.Endereco.rua}
+                                    defaultValue={usuario.endereco.rua}
                                     readOnly={!editavel}
                                 />
                             </div>
@@ -177,7 +178,7 @@ export default function PerfilPage() {
                                 <input
                                     name="numero"
                                     className="border p-2 w-full rounded"
-                                    defaultValue={usuario.Endereco.numero}
+                                    defaultValue={usuario.endereco.numero}
                                     readOnly={!editavel}
                                 />
                             </div>
@@ -187,7 +188,7 @@ export default function PerfilPage() {
                                 <input
                                     name="bairro"
                                     className="border p-2 w-full rounded"
-                                    defaultValue={usuario.Endereco.bairro}
+                                    defaultValue={usuario.endereco.bairro}
                                     readOnly={!editavel}
                                 />
                             </div>
@@ -197,7 +198,7 @@ export default function PerfilPage() {
                                 <input
                                     name="cidade"
                                     className="border p-2 w-full rounded"
-                                    defaultValue={usuario.Endereco.cidade}
+                                    defaultValue={usuario.endereco.cidade}
                                     readOnly={!editavel}
                                 />
                             </div>
@@ -207,7 +208,7 @@ export default function PerfilPage() {
                                 <input
                                     name="estado"
                                     className="border p-2 w-full rounded"
-                                    defaultValue={usuario.Endereco.estado}
+                                    defaultValue={usuario.endereco.estado}
                                     readOnly={!editavel}
                                 />
                             </div>
@@ -217,7 +218,7 @@ export default function PerfilPage() {
                                 <input
                                     name="cep"
                                     className="border p-2 w-full rounded"
-                                    defaultValue={usuario.Endereco.cep}
+                                    defaultValue={usuario.endereco.cep}
                                     readOnly={!editavel}
                                 />
                             </div>

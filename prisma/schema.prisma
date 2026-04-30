@@ -17,16 +17,14 @@ model Usuario {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   nome           String
   email          String   @unique
-  senha          String
-  cpf            String   @unique // Preferi usar CPF porque o RG vai ser substituído 
-  dataNascimento DateTime
-  telefone       String
+  senha          String?
+  cpf            String?   @unique // Preferi usar CPF porque o RG vai ser substituído 
+  dataNascimento DateTime?
+  telefone       String?
   status         String   @default("ESPERA")
   cargo          String   @default("USER")
 
-  Endereco   Endereco @relation(fields: [enderecoId], references: [id]) // Coloco esse atributo do tipo Endereco pra criar a relação. O FK é o enderecoId
-  enderecoId String   @unique @db.ObjectId
-
+  endereco Endereco?
   reservas Reservas[] // Relação 1:N com Reservas (quem vai ter FK é a Reserva)
 
   createdAt DateTime @default(now())
@@ -42,7 +40,9 @@ model Endereco {
   cidade      String
   estado      String
   cep         String
-  usuarios    Usuario? // Relacionamento inverso para acessar o usuário associado a essee endereço
+  usuarioId   String @unique @db.ObjectId // Relacionamento inverso para acessar o usuário associado a essee endereço
+
+  Usuario  Usuario @relation(fields: [usuarioId], references: [id]) // Coloco esse atributo do tipo Endereco pra criar a relação. O FK é o enderecoId
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
