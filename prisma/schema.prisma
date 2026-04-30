@@ -67,8 +67,13 @@ model Acervo {
 model Reservas {
   id      String   @id @default(auto()) @map("_id") @db.ObjectId
   // Tirei os atributos de livro daqui, podemos pegar pelo ID do acervo
-  dataRes DateTime @default(now())
   valiRes DateTime
+
+  retirada DateTime?
+  devolucao DateTime?
+  prazo DateTime?
+
+  token String
 
   Usuario   Usuario @relation(fields: [usuarioId], references: [id]) // Quem tem a FK é a reserva (1:N), então colocamos isso aqui em vez de no usuário!
   usuarioId String  @db.ObjectId

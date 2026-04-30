@@ -98,7 +98,7 @@ export default function AcervoTabela({ cargoUser, livros }: TabelaProps ) {
 									)}
 									{cargoUser === "USER" && (
 										<>
-											<td className="px-4 py-3"><button className="bg-blue-500 text-white py-1 px-3 rounded-md"><Link href={`/acervo/reservar?oid=${livro.id}`}>Editar</Link></button></td>
+											<td className="px-4 py-3"><button className="bg-blue-500 text-white py-1 px-3 rounded-md" disabled={ livro.unidades <= 0 }><Link href={ livro.unidades > 0 ? `/acervo/reservar/${livro.id}` : `#`}>Reservar</Link></button></td>
 										</>
 									)}
                   </tr>
