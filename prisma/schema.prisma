@@ -21,8 +21,11 @@ model Usuario {
   cpf            String?   @unique // Preferi usar CPF porque o RG vai ser substituído 
   dataNascimento DateTime?
   telefone       String?
-  status         String   @default("ESPERA")
+  situacao         String   @default("ESPERA")
+  status String @default("OFFLINE")
   cargo          String   @default("USER")
+
+  cadastroCompleto Boolean @default(true)
 
   endereco Endereco?
   reservas Reservas[] // Relação 1:N com Reservas (quem vai ter FK é a Reserva)

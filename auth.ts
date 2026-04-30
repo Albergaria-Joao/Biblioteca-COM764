@@ -24,13 +24,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             data: {
               email: user.email,
               nome: user.name ?? "Usuário",
-              status: "ESPERA", // Ele entra em espera até completar o perfil
+              situacao: "ESPERA", // Ele entra em espera até completar o perfil
               cargo: "USER",
+              cadastroCompleto: false,
             },
           });
         }
 
-        return !!usuarioExiste; // Retorna true se existe, false se não
+        return true; // Retorna true se existe, false se não
       }
       return true;
     },
@@ -41,7 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Buscamos o usuário no banco para garantir os dados mais recentes
         const dbUser = await prisma.usuario.findUnique({
           where: { email: user.email! },
-          select: { id: true, cargo: true }
+          select: { id: true, cargo: true}
         });
 
         if (dbUser) {
@@ -70,7 +71,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.usuario.findUnique({
-          where: { email: credentials.email as string, status:{not: "ESPERA"} },
+          where: { email: credentials.email as string, situacao:{not: "ESPERA"} },
         });
 
         if (!user || !user.senha) return null;
