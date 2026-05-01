@@ -81,7 +81,7 @@ model Reservas {
   Usuario   Usuario @relation(fields: [usuarioId], references: [id]) // Quem tem a FK é a reserva (1:N), então colocamos isso aqui em vez de no usuário!
   usuarioId String  @db.ObjectId
 
-  acervo   Acervo @relation(fields: [acervoId], references: [id])
+  Acervo   Acervo @relation(fields: [acervoId], references: [id])
   acervoId String @db.ObjectId
 
   createdAt DateTime @default(now())

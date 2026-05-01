@@ -52,12 +52,12 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 	const dataReserva = new Date();
 	const validade = new Date(dataReserva.setDate(dataReserva.getDate() + 5));
 	
-
+	const tokenHash = await bcrypt.hash(token.toString(), 10);
 
 	const reserva = await prisma.reservas.create({
 		data: {
 			valiRes: validade,
-			token: token.toString(),
+			token: tokenHash,
 			usuarioId: session?.user.id,
 			acervoId: livro.id,
 		}
