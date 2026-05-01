@@ -1,9 +1,11 @@
 import { prisma } from '@/lib/prisma';
 import QRCode from "../../components/QRCode";
+import EfetivarButton from "../../components/EfetivarButton";
 import { randomUUID } from 'crypto';
 import bcrypt from "bcrypt";
 import { auth } from "@/auth";
-import { NextResponse } from 'next/server';
+import { redirect, notFound } from 'next/navigation';
+
 
 
 export default async function ReservarPage({ params }: { params: Promise<{ reservaId: string }> }) {
@@ -12,8 +14,8 @@ export default async function ReservarPage({ params }: { params: Promise<{ reser
 
     const session = await auth();
 
-    if (!session) {
-        return;
+    if (!session || session.user.cargo !== "ADMIN" && session.user.cargo !== "BIBLIO") {
+		redirect('/login');
     }
     const reserva = await prisma.reservas.findUnique({
 			where: {
@@ -22,8 +24,8 @@ export default async function ReservarPage({ params }: { params: Promise<{ reser
 			select: {
 				id: true,
 				valiRes: true,
+				retirada: true,
 				token: true,
-				// Note o 'U' maiúsculo para bater com o model Reservas
 				Usuario: { 
 					select: {
 						id: true,
@@ -38,26 +40,34 @@ export default async function ReservarPage({ params }: { params: Promise<{ reser
 					}
 				}
 			}
-		});
-
-	if (!reserva) return new NextResponse("Reserva não encontrada", { status: 404 });
+	});
 	
+
+
+	if (!reserva) return 404;
+	
+	if (reserva.retirada && reserva.retirada != null && reserva.retirada !== undefined) {
+		return (
+			<div className="p-4">
+				<h1 className="text-2xl font-bold mb-4">Reserva</h1>
+				<div>
+					<ul>
+						<li>ISBN: {reserva.Acervo.isbn}</li>
+						<li>Título: {reserva.Acervo.titulo}</li>
+						<li>Validade: {reserva.valiRes.toISOString()}</li>
+						<li>Usuário: {reserva.Usuario.nome}</li>
+					</ul>
+				
+					<h1>Reserva já efetuada em {reserva.retirada.toISOString()}</h1>
+				</div>
+			</div>
+		);
+	}
+
 	const dataRetirada = new Date();
 	console.log(dataRetirada);
 	const prazo = new Date();
 	const dataPrazo = new Date(prazo.setDate(prazo.getDate() + 5));
-
-	const reservaEfetivada = await prisma.reservas.update({
-		where: {
-			id: reserva.id,
-		},
-		data: {
-				retirada: dataRetirada,
-				prazo: dataPrazo,
-			}
-		})
-
-    const urlQRCode = `${process.env.WEBSITE_URL}/acervo/ativar-reserva/${reserva.id}`
 
     return (
 
@@ -69,10 +79,10 @@ export default async function ReservarPage({ params }: { params: Promise<{ reser
                     <li>Título: {reserva.Acervo.titulo}</li>
                     <li>Validade: {reserva.valiRes.toISOString()}</li>
                     <li>Usuário: {reserva.Usuario.nome}</li>
-                </ul>
+				</ul>
+				
+				<EfetivarButton reservaId={reservaId} dataPrazo={dataPrazo} dataRetirada={dataRetirada}></EfetivarButton>
             </div>
-        
-
         </div>
     );
 }

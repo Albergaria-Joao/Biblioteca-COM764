@@ -17,26 +17,26 @@ type Livro = {
 }
 
 interface TabelaProps {
-	livros: Livro[];
+	//livros: Livro[];
 	cargoUser: string;
 }
 
-export default function AcervoTabela({ cargoUser, livros }: TabelaProps ) {
-  //const [livros, setLivros] = useState<Livro[]>([]);
+export default function AcervoTabela({ cargoUser }: TabelaProps ) {
+  const [livros, setLivros] = useState<Livro[]>([]);
 
   const router = useRouter();
-  // useEffect(() => {
-  //   async function carregarLivros() {
-  //     const response = await fetch("/api/acervo", {
-  //       method: "GET"
-  //     });
+  useEffect(() => {
+    async function carregarLivros() {
+      const response = await fetch("/api/acervo", {
+        method: "GET"
+      });
 
-  //     const data = await response.json();
-  //     setLivros(data);
-  //   }
+      const data = await response.json();
+      setLivros(data);
+    }
 
-  //   carregarLivros();
-  // }, []);
+    carregarLivros();
+  }, []);
 
   
 

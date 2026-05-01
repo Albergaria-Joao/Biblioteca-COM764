@@ -3,32 +3,32 @@ import { logout } from "../actions/auth";
 import { auth } from '@/auth';
 import AcervoTabela from "./components/AcervoTabela";
 import { prisma } from '@/lib/prisma';
-
+import { redirect, notFound } from 'next/navigation';
 export default async function AcervoPage() {
 
   const session = await auth();
   if (!session) {
-    return null;
+    redirect('/login');
   }
   const cargoUser = session.user.cargo;
 
 
-  const livros = await prisma.acervo.findMany({
-      where: {
-          excluido: false, // Filtra apenas os livros não excluidoss
-      },
-      select: {
-          id: true,
-          isbn: true,
-          titulo: true,
-          autor: true,
-          editora: true,
-          edicao: true,
-          anoPublicacao: true,
-          genero: true,
-          unidades: true,
-      },
-  });
+  // const livros = await prisma.acervo.findMany({
+  //     where: {
+  //         excluido: false, // Filtra apenas os livros não excluidoss
+  //     },
+  //     select: {
+  //         id: true,
+  //         isbn: true,
+  //         titulo: true,
+  //         autor: true,
+  //         editora: true,
+  //         edicao: true,
+  //         anoPublicacao: true,
+  //         genero: true,
+  //         unidades: true,
+  //     },
+  // });
 
 
   return (
@@ -40,7 +40,7 @@ export default async function AcervoPage() {
           Lista de Livros
         </h1>
       </div>
-      <AcervoTabela cargoUser={cargoUser} livros={livros} />
+      <AcervoTabela cargoUser={cargoUser} />
     </div>
   );
 }

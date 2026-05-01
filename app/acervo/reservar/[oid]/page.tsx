@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 import bcrypt from "bcrypt";
 import { auth } from "@/auth";
 import { NextResponse } from 'next/server';
-
+import { redirect, notFound } from 'next/navigation';
 
 function getRandomInt(min: number, max: number) {
     min = Math.ceil(min);
@@ -20,7 +20,7 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 	const session = await auth();
 
 	if (!session) {
-		return;
+		redirect('/login')
 	}
 
 	const livro = await prisma.acervo.findUnique({
