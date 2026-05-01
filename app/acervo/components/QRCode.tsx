@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import QRCode from "qrcode";
 import Image from "next/image";
+import { DateTime } from "next-auth/providers/kakao";
 
 export default function QRCodeGenerator({ url }: { url: string }) {
   const [src, setSrc] = useState("");
@@ -19,9 +20,18 @@ export default function QRCodeGenerator({ url }: { url: string }) {
     }).then(setSrc);
   }, [url]);
 
+
+
+
   return (
       <div>
-      {src ? <img src={src} alt="QR Code" /> : <p>Gerando...</p>}
+      {src ?
+        <div>
+          <img src={src} alt="QR Code" />
+          <a href="src" download={`Reserva.png`}>Download</a>
+        </div>
+        : <p>Gerando...</p>}
+      
     </div>
   );
 }
