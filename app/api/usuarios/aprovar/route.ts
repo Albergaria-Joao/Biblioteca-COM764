@@ -17,3 +17,23 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
 }
+
+export async function POST(req: Request) {
+  try {
+
+    const {id, status} = await req.json();
+
+    const usuarioAtualizado = await prisma.usuario.update({
+      where: { id: id as string },
+       data: {
+        status: status, // ex: "aprovado" ou "recusado"
+      },
+    });
+
+    return NextResponse.json(usuarioAtualizado);
+
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+  }
+}

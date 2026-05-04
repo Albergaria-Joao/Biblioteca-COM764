@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { METHODS } from "http";
 
 type Usuario = {
   id: number
@@ -28,12 +29,31 @@ export default function UsuariosPage() {
       // findUnique retorna objeto, não array
       setUsuarios(data ? [data] : []);
     }
-    //AA
+
     carregarUsuarios();
   }, [uid]);
 
+  async function atualizarUsuario(id: number, status: string) {
+    try {
+      const response = await fetch("/api/usuarios/aprovar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, status }),
+      });
+
+      if (!response.ok) throw new Error("Erro ao atualizar");
+
+      alert(`Usuário ${status}!`);
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao atualizar usuário");
+    }
+  }
+
   return (
-     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
       <div className="bg-white shadow-lg rounded-2xl w-full max-w-xl p-6">
         <h1 className="text-2xl font-bold mb-4 text-center">Detalhes do Usuário</h1>
 
@@ -64,14 +84,14 @@ export default function UsuariosPage() {
 
               <div className="flex gap-4 mt-6">
                 <button
-                  onClick={() => alert("Usuário aprovado!")}
+                  onClick={() => atualizarUsuario(user.id, "ATIVADO")}
                   className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl transition"
                 >
                   Aprovar
                 </button>
 
                 <button
-                  onClick={() => alert("Usuário recusado!")}
+                  onClick={() => atualizarUsuario(user.id, "SUSPENSO")}
                   className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl transition"
                 >
                   Recusar
