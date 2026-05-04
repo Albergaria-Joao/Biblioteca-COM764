@@ -1,91 +1,12 @@
-"use client";
-import { z } from "zod";
-import { useState } from "react";
 import AcervoForm from "../components/AcervoForm";
 
-type LivroCadastro = {
-  isbn: string,
-  titulo: string,
-  autor: string,
-  editora: string,
-  edicao?: string,
-  anoPublicacao: number,
-  genero: string,
-  unidades: number,
-}
-
-const livroSchema = z.object({
-  titulo: z.string(),
-  isbn: z.string(),
-  autor: z.string(),
-  editora: z.string(),
-  edicao: z.string().optional(),
-  anoPublicacao: z.coerce.number(),
-  genero: z.string(),
-  unidades: z.coerce.number().min(0)
-});
 
 export default function AdicionarAcervoPage() {
-
-    const [livroAtual, setLivroAtual] = useState<LivroCadastro>({
-        titulo: "",
-        isbn: "",
-        autor: "",
-        editora: "",
-        edicao: "",
-        anoPublicacao: 0,
-        genero: "",
-        unidades: 1,
-    });
-
-    const criarLivro = async  (livro: LivroCadastro) => {
-        const response = await fetch("/api/acervo", {
-            method:'POST',
-            body: JSON.stringify({livro: livro})
-        });
-        return response;
-    }
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        //const formData = new FormData(e.currentTarget);
-        //const dadosBrutos = Object.fromEntries(formData.entries());
-        const dadosBrutos = livroAtual;
-        console.log(dadosBrutos);
-        const validacao = livroSchema.safeParse(dadosBrutos);
-
-        if (!validacao.success) {
-            console.error(validacao.error.format());
-            alert("Há erros de formato nos dados");
-            return;
-        }
-        const dados = validacao.data;
-        console.log("Dados validados:", dados);
-        const novoLivro: LivroCadastro = {
-            titulo: dados.titulo, 
-            isbn: dados.isbn, 
-            autor: dados.autor, 
-            editora: dados.editora, 
-            edicao: dados.edicao, 
-            anoPublicacao: dados.anoPublicacao, 
-            genero: dados.genero,
-            unidades: dados.unidades,    
-        }
-
-        const res = await criarLivro(novoLivro);
-        const resJson = await res.json();
-        if (resJson?.error) {
-            alert("ERRO NA CRIAÇÃO: " + resJson.error);
-        } else {
-            alert("LIVRO ADICIONADO");
-        }
-    }
 
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Adicionar Item ao Acervo</h1>
-            <AcervoForm tipo="adicionar" livroAtual={livroAtual} setLivroAtual={setLivroAtual} handleSubmit={handleSubmit} />
+            <AcervoForm tipo="adicionar"/>
         </div>
     );
 }

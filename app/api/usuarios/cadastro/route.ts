@@ -21,17 +21,7 @@ export async function POST(request: Request) {
 
 
     const novoUsuario = await prisma.$transaction(async (prisma) => {
-      const endereco = await prisma.endereco.create({
-        data: {
-          rua: body.rua,
-          cep: body.cep,
-          complemento: body.complemento,
-          numero: body.numero,
-          cidade: body.cidade,
-          estado: body.estado,
-          bairro: body.bairro
-        }
-      });
+      
 
       const usuario = await prisma.usuario.create({
         data: {
@@ -42,8 +32,20 @@ export async function POST(request: Request) {
           dataNascimento: new Date(body.dataNasc),
           cargo: body.cargo,
           telefone: body.telefone,
-          enderecoId: endereco.id
         },
+      });
+
+      const endereco = await prisma.endereco.create({
+        data: {
+          rua: body.rua,
+          cep: body.cep,
+          complemento: body.complemento,
+          numero: body.numero,
+          cidade: body.cidade,
+          estado: body.estado,
+          bairro: body.bairro,
+          usuarioId: usuario.id,
+        }
       });
 
       return usuario;
