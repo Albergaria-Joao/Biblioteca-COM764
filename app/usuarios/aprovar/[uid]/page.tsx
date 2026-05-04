@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { METHODS } from "http";
+
 
 type Usuario = {
-  id: number
+  id: string
   nome: string
   email: string
   cpf: string
@@ -16,7 +16,8 @@ export default function UsuariosPage() {
 
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const router = useRouter();
-  const { uid } = useParams(); // ✅ no topo
+  const params = useParams();
+  const uid = Array.isArray(params.uid) ? params.uid[0] : params.uid;
 
   useEffect(() => {
 
@@ -33,7 +34,7 @@ export default function UsuariosPage() {
     carregarUsuarios();
   }, [uid]);
 
-  async function atualizarUsuario(id: number, status: string) {
+  async function atualizarUsuario(id: string, status: string) {
     try {
       const response = await fetch("/api/usuarios/aprovar", {
         method: "POST",

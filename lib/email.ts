@@ -9,7 +9,7 @@ export async function enviarEmailCadastro(usuario: any) {
     },
   });
 
-  const linkAprovar = `http://localhost:3000/aprovar/${usuario.id}`;
+  const linkAprovar = `http://localhost:3000/usuarios/aprovar/${usuario.id}`;
 
   await transporter.sendMail({
     from: `"Sistema Biblioteca" <${process.env.EMAIL_USER}>`,

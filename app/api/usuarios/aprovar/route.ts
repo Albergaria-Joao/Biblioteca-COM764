@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     const usuarioAtualizado = await prisma.usuario.update({
       where: { id: id as string },
        data: {
-        status: status, // ex: "aprovado" ou "recusado"
+        situacao: status, // ex: "aprovado" ou "recusado"
       },
     });
 
