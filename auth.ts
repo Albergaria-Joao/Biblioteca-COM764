@@ -16,7 +16,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!user.email) return false;
         //Deve fazer alerta de que usuer nãe existe ou ainda não foi aprovado
         const usuarioExiste = await prisma.usuario.findUnique({
-          where: { email: user.email},
+          where: { email: user.email },
         });
 
         if (!usuarioExiste) {
@@ -42,7 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Buscamos o usuário no banco para garantir os dados mais recentes
         const dbUser = await prisma.usuario.findUnique({
           where: { email: user.email! },
-          select: { id: true, cargo: true}
+          select: { id: true, cargo: true }
         });
 
         if (dbUser) {
@@ -71,13 +71,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.usuario.findUnique({
-          where: { email: credentials.email as string, situacao:{not: "ESPERA"} },
+          where: { email: credentials.email as string, situacao: { not: "ESPERA" } },
         });
 
         if (!user || !user.senha) return null;
 
         const isValid = await bcrypt.compare(credentials.password as string, user.senha);
         if (!isValid) return null;
+
+        await prisma.usuario.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            status: "ONLINE",
+          }
+        })
 
         return { id: user.id, email: user.email, name: user.nome, cargo: user.cargo };
       },

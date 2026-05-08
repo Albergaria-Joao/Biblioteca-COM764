@@ -5,23 +5,42 @@ import bcrypt from "bcrypt";
 import { auth } from "@/auth";
 import { NextResponse } from 'next/server';
 import { redirect, notFound } from 'next/navigation';
+import { toast } from "sonner";
+import { z } from "zod";
 
 function getRandomInt(min: number, max: number) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, {
+	message: "OID inválido",
+});
 
 const token = getRandomInt(100000, 1000000)
 export default async function ReservarPage({ params }: { params: Promise<{ oid: string }> }) {
 
 	const { oid } = await params;
 
+
 	const session = await auth();
 
 	if (!session) {
-		redirect('/login')
+		redirect('/login');
 	}
+	else if (session.user.cargo !== "USER") {
+		redirect('/acervo');
+	}
+
+
+	const validation = objectIdSchema.safeParse(oid); // Valida o ID, se for inválido já para por aqui
+
+	if (!validation.success) {
+		//toast.error("ID do tryout inválido.");
+		return redirect("/acervo");
+	}
+
 
 	const livro = await prisma.acervo.findUnique({
 		where: {
@@ -51,7 +70,7 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 
 	const dataReserva = new Date();
 	const validade = new Date(dataReserva.setDate(dataReserva.getDate() + 5));
-	
+
 	const tokenHash = await bcrypt.hash(token.toString(), 10);
 
 	const reserva = await prisma.reservas.create({
@@ -91,7 +110,7 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 				</ul>
 			</div>
 			<QRCode url={urlQRCode} />
-		
+
 
 		</div>
 	);

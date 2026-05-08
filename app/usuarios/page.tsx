@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { logout } from "../actions/auth";
+import Link from 'next/link';
 
 type Usuario = {
   id: number
@@ -82,6 +83,11 @@ export default function UsuariosPage() {
                   <td className="px-4 py-3">{usuario.email}</td>
                   <td className="px-4 py-3">{usuario.cpf}</td>
                   <td className="px-4 py-3">{usuario.telefone}</td>
+                  <td className="px-4 py-3">
+                    <button className="bg-blue-500 text-white py-1 px-3 rounded-md">
+                      <Link href={`/usuarios/${usuario.id}/reservas`}>Reservas</Link>
+                    </button></td>
+
                 </tr>
               ))}
             </tbody>
