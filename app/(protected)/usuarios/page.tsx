@@ -32,9 +32,7 @@ export default function UsuariosPage() {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <button onClick={logout} className="p-1.5 pr-3 pl-3 bg-red-500 text-white rounded-xl cursor-pointer">Sair</button> {/*Teste de botão de logout com server action*/}
-      {/* HEADER */}
+    <div className="p-6 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           Lista de Usuários
@@ -83,10 +81,6 @@ export default function UsuariosPage() {
                   <td className="px-4 py-3">{usuario.email}</td>
                   <td className="px-4 py-3">{usuario.cpf}</td>
                   <td className="px-4 py-3">{usuario.telefone}</td>
-                  <td className="px-4 py-3">
-                    <button className="bg-blue-500 text-white py-1 px-3 rounded-md">
-                      <Link href={`/usuarios/${usuario.id}/reservas`}>Reservas</Link>
-                    </button></td>
 
                 </tr>
               ))}

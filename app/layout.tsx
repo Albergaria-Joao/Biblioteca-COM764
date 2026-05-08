@@ -1,15 +1,18 @@
-import "./globals.css";
+import "@/app/globals.css";
 
-export default function RootLayout({
+export default function SistemaLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR">
-      <body>
+    <html><body>
+      <div className="bg-gray-200 min-h-screen">
+
         {children}
-      </body>
-    </html>
-  )
+
+
+      </div>
+    </body></html>
+  );
 }
