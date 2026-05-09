@@ -31,8 +31,8 @@ export default function Sidebar({ session }: SidebarProps) {
 	}
 	else {
 		links.push(
-			{ nome: "Minhas Reservas", href: "/minhas-reservas", icon: <BookOpenIcon size={20} /> },
-			{ nome: "Meus Empréstimos", href: "/meus-emprestimos", icon: <RefreshCcw size={20} /> }
+			{ nome: "Minhas Reservas", href: "/reservas", icon: <BookOpenIcon size={20} /> },
+			{ nome: "Meus Empréstimos", href: "/emprestimos", icon: <RefreshCcw size={20} /> }
 		)
 	}
 	return (

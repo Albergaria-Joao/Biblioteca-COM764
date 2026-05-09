@@ -7,29 +7,59 @@ import { redirect, notFound } from 'next/navigation';
 export default async function AcervoPage() {
 
     const session = await auth();
-    if (!session || (session.user.cargo !== 'BIBLIO' && session.user.cargo !== 'ADMIN')) {
+
+    if (!session) {
         redirect('/login');
     }
 
-    const reservas = await prisma.reservas.findMany({
-        select: {
-            id: true,
-            createdAt: true,
-            valiRes: true,
-            Acervo: {
-                select: {
-                    titulo: true,
-                    isbn: true,
-                    autor: true,
+
+    let reservas: any[];
+    if (session.user.cargo == 'BIBLIO' || session.user.cargo == 'ADMIN') {
+        reservas = await prisma.reservas.findMany({
+            select: {
+                id: true,
+                createdAt: true,
+                valiRes: true,
+                Acervo: {
+                    select: {
+                        titulo: true,
+                        isbn: true,
+                        autor: true,
+                    }
+                },
+                Usuario: {
+                    select: {
+                        nome: true,
+                    }
                 }
             },
-            Usuario: {
-                select: {
-                    nome: true,
+        })
+    }
+    else {
+        reservas = await prisma.reservas.findMany({
+            where: {
+                usuarioId: session.user.id
+            },
+            select: {
+                id: true,
+                createdAt: true,
+                valiRes: true,
+                Acervo: {
+                    select: {
+                        titulo: true,
+                        isbn: true,
+                        autor: true,
+                    }
+                },
+                Usuario: {
+                    select: {
+                        nome: true,
+                    }
                 }
-            }
-        },
-    })
+            },
+        })
+    }
+
 
     return (
         <div className="p-6 min-h-screen">

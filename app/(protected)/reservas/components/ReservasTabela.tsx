@@ -17,8 +17,6 @@ type Reserva = {
     Usuario: {
         nome: string,
     }
-
-
 }
 
 interface TabelaProps {

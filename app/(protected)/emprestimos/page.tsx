@@ -7,37 +7,72 @@ import { redirect, notFound } from 'next/navigation';
 export default async function AcervoPage() {
 
     const session = await auth();
-    if (!session || (session.user.cargo !== 'BIBLIO' && session.user.cargo !== 'ADMIN')) {
+
+    if (!session) {
         redirect('/login');
     }
 
-    const emprestimos = await prisma.reservas.findMany({
-        where: {
-            retirada: {
-                not: null,
-            },
-            prazo: {
-                not: null,
-            }
-        },
-        select: {
-            id: true,
-            retirada: true,
-            prazo: true,
-            Acervo: {
-                select: {
-                    titulo: true,
-                    isbn: true,
-                    autor: true,
+    let emprestimos: any[];
+
+    if (session.user.cargo == 'BIBLIO' || session.user.cargo == 'ADMIN') {
+        emprestimos = await prisma.reservas.findMany({
+            where: {
+                retirada: {
+                    not: null,
+                },
+                prazo: {
+                    not: null,
                 }
             },
-            Usuario: {
-                select: {
-                    nome: true,
+            select: {
+                id: true,
+                retirada: true,
+                prazo: true,
+                Acervo: {
+                    select: {
+                        titulo: true,
+                        isbn: true,
+                        autor: true,
+                    }
+                },
+                Usuario: {
+                    select: {
+                        nome: true,
+                    }
                 }
-            }
-        },
-    })
+            },
+        });
+    }
+    else {
+        emprestimos = await prisma.reservas.findMany({
+            where: {
+                usuarioId: session.user.id,
+                retirada: {
+                    not: null,
+                },
+                prazo: {
+                    not: null,
+                }
+            },
+            select: {
+                id: true,
+                retirada: true,
+                prazo: true,
+                Acervo: {
+                    select: {
+                        titulo: true,
+                        isbn: true,
+                        autor: true,
+                    }
+                },
+                Usuario: {
+                    select: {
+                        nome: true,
+                    }
+                }
+            },
+        });
+    }
 
     return (
         <div className="p-6 min-h-screen">
