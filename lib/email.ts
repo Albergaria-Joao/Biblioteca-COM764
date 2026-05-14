@@ -28,7 +28,7 @@ export async function enviarEmailCadastro(usuario: any) {
           <div style="background: #fafafa; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <p><b>Nome:</b> ${usuario.nome}</p>
             <p><b>Email:</b> ${usuario.email}</p>
-            <p><b>Email:</b> ${usuario.cargo}</p>
+            <p><b>Cargo:</b> ${usuario.cargo}</p>
           </div>
 
           <p style="text-align: center; margin-top: 30px;">
