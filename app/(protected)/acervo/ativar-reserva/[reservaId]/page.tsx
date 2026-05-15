@@ -67,7 +67,8 @@ export default async function ReservarPage({ params }: { params: Promise<{ reser
 	const dataRetirada = new Date();
 	console.log(dataRetirada);
 	const prazo = new Date();
-	const dataPrazo = new Date(prazo.setDate(prazo.getDate() + 5));
+	prazo.setHours(23, 59, 59, 999);
+	const dataPrazo = new Date(prazo.setDate(prazo.getDate() + 7));
 
 	return (
 
