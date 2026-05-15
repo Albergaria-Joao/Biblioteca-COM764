@@ -19,6 +19,15 @@ export default auth((req) => {
   if (!isLogged && nextUrl.pathname === "/") {
     return Response.redirect(new URL("/login", nextUrl));
   }
+
+  if (!isLogged && nextUrl.pathname.startsWith("/acervo/ativar-reserva")) {
+    const loginUrl = new URL('/login', nextUrl)
+    // Armazena a página que ele tentou acessar
+    loginUrl.searchParams.set('callbackUrl', nextUrl.pathname)
+    return Response.redirect(loginUrl)
+  }
+
+
 });
 
 export const config = {

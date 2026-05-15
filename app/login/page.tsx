@@ -1,6 +1,6 @@
 "use client"
 import { signIn } from "next-auth/react";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { z } from "zod";
 import { LoginButton } from "./components/LoginButton";
@@ -15,6 +15,9 @@ export default function LoginPage() {
     const [carregando, setCarregando] = useState(false);
 
     const router = useRouter();
+
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get('callbackUrl') || '/acervo';
     async function efetuarLogin(
         email: string,
         senha: string,
@@ -31,7 +34,7 @@ export default function LoginPage() {
             alert("E-mail ou senha incorretos.");
             setCarregando(false);
         } else {
-            router.push("/acervo");
+            router.push(callbackUrl);
             router.refresh(); // Garante que o servidor perceba a sessão nova
         }
     }
