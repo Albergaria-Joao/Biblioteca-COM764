@@ -1,216 +1,293 @@
 "use client"
 
-import { useEffect, useState } from "react";
-
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
-const usuarioSchema = z.object({
-  nome: z.string(),
-  email: z.string(),
-  senha: z.string(),
-  cpf: z.string(),
-  telefone: z.string(),
-  dataNasc: z.string(),
-  cargo: z.string(),
-  cep: z.string(),
-  rua: z.string(),
-  numero: z.string(),
-  complemento: z.string(),
-  bairro: z.string(),
-  cidade: z.string(),
-  estado: z.string()
 
-  // Validação que a IA gerou para usarmos depois
-  //nome: z.string().min(3, "O nome deve ter no mínimo 3 caracteres"),
-  //email: z.string().email("E-mail com formato inválido"),
-  // senha: z.string().min(8, "A senha deve ter no mínimo 8 caracteres"),
-  // cpf: z.string().length(14, "O CPF deve estar formatado corretamente"),
-  // telefone: z.string().min(10, "Telefone inválido"),
-  // dataNasc: z.string(),
-  // cep: z.string().length(9, "CEP inválido"),
-  // rua: z.string().min(2, "Rua é obrigatória"),
-  // numero: z.string().min(1, "Número é obrigatório"),
-  // complemento: z.string().optional(),
-  // bairro: z.string().min(2, "Bairro é obrigatório"),
-  // cidade: z.string().min(2, "Cidade é obrigatória"),
-  // estado: z.string().length(2, "O estado deve ter 2 letras (UF)")
+// Lista de estados do Brasil para o Select
+const ESTADOS_BR = [
+  { uf: "AC", nome: "Acre" }, { uf: "AL", nome: "Alagoas" }, { uf: "AP", nome: "Amapá" },
+  { uf: "AM", nome: "Amazonas" }, { uf: "BA", nome: "Bahia" }, { uf: "CE", nome: "Ceará" },
+  { uf: "DF", nome: "Distrito Federal" }, { uf: "ES", nome: "Espírito Santo" }, { uf: "GO", nome: "Goiás" },
+  { uf: "MA", nome: "Maranhão" }, { uf: "MT", nome: "Mato Grosso" }, { uf: "MS", nome: "Mato Grosso do Sul" },
+  { uf: "MG", nome: "Minas Gerais" }, { uf: "PA", nome: "Pará" }, { uf: "PB", nome: "Paraíba" },
+  { uf: "PR", nome: "Paraná" }, { uf: "PE", nome: "Pernambuco" }, { uf: "PI", nome: "Piauí" },
+  { uf: "RJ", nome: "Rio de Janeiro" }, { uf: "RN", nome: "Rio Grande do Norte" }, { uf: "RS", nome: "Rio Grande do Sul" },
+  { uf: "RO", nome: "Rondônia" }, { uf: "RR", nome: "Roraima" }, { uf: "SC", nome: "Santa Catarina" },
+  { uf: "SP", nome: "São Paulo" }, { uf: "SE", nome: "Sergipe" }, { uf: "TO", nome: "Tocantins" }
+];
+
+const usuarioSchema = z.object({
+  nome: z.string().min(3, "O nome deve ter no mínimo 3 caracteres."),
+  email: z.string().email("Insira um endereço de e-mail válido."),
+  senha: z.string().min(5, "A senha deve ter no mínimo 5 caracteres."),
+  cpf: z.string().min(14, "Insira o CPF completo com pontos e traço."),
+  telefone: z.string().min(14, "Insira o telefone completo com DDD."),
+  dataNasc: z.string().min(1, "A data de nascimento é obrigatória."),
+  cargo: z.string().min(1, "Selecione o tipo de perfil"),
+  cep: z.string().min(9, "O CEP deve conter 8 dígitos e o traço."),
+  rua: z.string().min(2, "O nome da rua é obrigatório."),
+  numero: z.string().min(1, "O número residencial é obrigatório."),
+  complemento: z.string().optional(),
+  bairro: z.string().min(2, "O campo bairro é obrigatório."),
+  cidade: z.string().min(2, "A cidade é obrigatória."),
+  estado: z.string().length(2, "Selecione um estado válido.")
 });
 
 export default function CadastroPage() {
+  const [carregando, setCarregando] = useState(false);
+  const [erroMensagem, setErroMensagem] = useState<string | null>(null);
+  const router = useRouter();
 
-  async function criarUsuario(
-    email: string,
-    senha: string,
-    nome: string,
-    cpf: string,
-    telefone: string,
-    dataNasc: string,
-    cargo: string,
-    rua: string,
-    numero: string,
-    complemento: string,
-    bairro: string,
-    cidade: string,
-    estado: string,
-    cep: string,
+  // Estados locais para controlar os valores com máscara
+  const [cpf, setCpf] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [cep, setCep] = useState("");
 
-  ) {
-    console.log(cpf)
+  // Funções de Mascaramento de String
+  const maskCPF = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .substring(0, 14);
+  };
 
+  const maskTelefone = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .replace(/(-\d{4})\d+?$/, "$1")
+      .substring(0, 15);
+  };
 
-    // Formatação de data para o banco aceitar
-    const dataNascStr = dataNasc + "T00:00:00.000Z";
+  const maskCEP = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .substring(0, 9);
+  };
 
-    console.log(dataNascStr)
-    const response = await fetch("/api/usuarios/cadastro", {
-        method:'POST',
+  async function criarUsuario(dados: z.infer<typeof usuarioSchema>) {
+    setCarregando(true);
+    setErroMensagem(null);
+
+    const dataNascStr = dados.dataNasc + "T00:00:00.000Z";
+
+    try {
+      const response = await fetch("/api/usuarios/cadastro", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email, senha, 
-          nome, cpf, 
-          telefone, dataNasc: dataNascStr, cargo,
-          rua, numero,
-          complemento, bairro,
-          cidade, estado,
-          cep
+          ...dados,
+          dataNasc: dataNascStr
         })
-    });
-    
-    // Adicionar validações e retornos de dados incorretos aqui quando fizer
+      });
+
+      if (!response.ok) {
+        const erroApi = await response.json().catch(() => null);
+        setErroMensagem(response.statusText || "Houve um erro inesperado.");
+        throw new Error(erroApi?.error || "Não foi possível concluir o registro.");
+      }
+
+      router.push("/login");
+    } catch (error: any) {
+      console.error(error);
+      setErroMensagem(error.message || "Houve um erro inesperado.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErroMensagem(null);
 
     const formData = new FormData(e.currentTarget);
     const dadosBrutos = Object.fromEntries(formData.entries());
-    console.log(dadosBrutos);
+
     const validacao = usuarioSchema.safeParse(dadosBrutos);
 
     if (!validacao.success) {
       console.error(validacao.error.format());
-      alert("Há erros de formato nos dados");
+      const primeiroErro = validacao.error.issues[0]?.message || "Há erros de preenchimento nos dados.";
+      setErroMensagem(primeiroErro);
       return;
     }
-    const dados = validacao.data;
 
-    console.log(dados.cargo)
-
-    console.log("Dados prontos para envio:", dados);
-    criarUsuario(dados.email, dados.senha, dados.nome, dados.cpf, dados.telefone, dados.dataNasc, dados.cargo, dados.rua, dados.numero, dados.complemento, dados.bairro, dados.cidade, dados.estado, dados.numero);
+    criarUsuario(validacao.data);
   };
 
   return (
-    <div>
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Cadastro</h1>
-
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-xl text-gray-800">
-          <h2 className="text-2xl font-bold mb-6 border-b pb-2">Dados Pessoais</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-            <div className="flex flex-col">
-              <label htmlFor="nome" className="mb-1 font-medium text-sm">Nome Completo</label>
-              <input type="text" name="nome" id="nome" required placeholder="Ex: João da Silva" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="email" className="mb-1 font-medium text-sm">E-mail</label>
-              <input type="email" name="email" id="email" required placeholder="joao@exemplo.com" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="senha" className="mb-1 font-medium text-sm">Senha</label>
-              <input type="password" name="senha" id="senha" required placeholder="••••••••" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="cpf" className="mb-1 font-medium text-sm">CPF</label>
-              <input type="text" name="cpf" id="cpf" required placeholder="000.000.000-00" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="telefone" className="mb-1 font-medium text-sm">Telefone</label>
-              <input type="tel" name="telefone" id="telefone" required placeholder="(00) 00000-0000" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="dataNasc" className="mb-1 font-medium text-sm">Data de Nascimento</label>
-              <input type="date" name="dataNasc" id="dataNasc" required 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-          </div>
-
-          <h2 className="text-2xl font-bold mb-6 border-b pb-2">Endereço</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-8">
-            <div className="flex flex-col md:col-span-3">
-              <label htmlFor="cep" className="mb-1 font-medium text-sm">CEP</label>
-              <input type="text" name="cep" id="cep" required placeholder="00000-000" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col md:col-span-7">
-              <label htmlFor="rua" className="mb-1 font-medium text-sm">Rua</label>
-              <input type="text" name="rua" id="rua" required placeholder="Nome da rua, avenida, etc." 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col md:col-span-2">
-              <label htmlFor="numero" className="mb-1 font-medium text-sm">Número</label>
-              <input type="text" name="numero" id="numero" required placeholder="123" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col md:col-span-4">
-              <label htmlFor="complemento" className="mb-1 font-medium text-sm">Complemento <span className="text-gray-400 font-normal">(Opcional)</span></label>
-              <input type="text" name="complemento" id="complemento" placeholder="Apto 42, Bloco B" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col md:col-span-4">
-              <label htmlFor="bairro" className="mb-1 font-medium text-sm">Bairro</label>
-              <input type="text" name="bairro" id="bairro" required placeholder="Centro" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col md:col-span-3">
-              <label htmlFor="cidade" className="mb-1 font-medium text-sm">Cidade</label>
-              <input type="text" name="cidade" id="cidade" required placeholder="Sua Cidade" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-            </div>
-
-            <div className="flex flex-col md:col-span-1">
-              <label htmlFor="estado" className="mb-1 font-medium text-sm">UF</label>
-              <input type="text" name="estado" id="estado" required maxLength={2} placeholder="SP" 
-                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all uppercase" />
-            </div>
-
-            <div className="flex md:col-span-7 mt-5 md:mt-0">
-              <div className="flex ml-11">
-                <input type="radio" name="cargo" id="cargo-user" value="USER" className="mr-2" />
-                <label htmlFor="cargo-user" className="mb-1 font-medium text-sm">Sou Usuário</label>
-                
-              </div>  
-              <div className="flex ml-11">
-                <input type="radio" name="cargo" id="cargo-biblio" value="BIBLIO" className="mr-2" />
-                <label htmlFor="cargo-biblio" className="mb-1 font-medium text-sm">Sou Bibliotecário</label>
-              </div>
-            </div>  
-          </div>
-
-          <button 
-            type="submit" 
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold text-lg py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors shadow-md"
-          >
-            Cadastrar Usuário
-          </button>
-        </form>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-4xl">
+        <h2 className="text-center text-3xl font-extrabold text-gray-900 tracking-tight">
+          Crie sua Conta
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Já possui uma conta?{" "}
+          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+            Faça login aqui
+          </Link>
+        </p>
       </div>
 
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-4xl">
+        <div className="bg-white py-8 px-6 shadow-xl rounded-xl sm:px-10 border border-gray-100">
+
+          {erroMensagem && (
+            <div className="mb-6 p-3.5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-start gap-2.5 animate-fadeIn">
+              <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{erroMensagem}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+
+            {/* Seção: Dados Pessoais */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">
+                Dados Pessoais
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="flex flex-col">
+                  <label htmlFor="nome" className="mb-1 font-medium text-sm text-gray-700">Nome Completo</label>
+                  <input type="text" name="nome" id="nome" required placeholder="Ex: João da Silva" disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="email" className="mb-1 font-medium text-sm text-gray-700">E-mail</label>
+                  <input type="email" name="email" id="email" required placeholder="joao@exemplo.com" disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="senha" className="mb-1 font-medium text-sm text-gray-700">Senha</label>
+                  <input type="password" name="senha" id="senha" required placeholder="••••••••" disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                {/* Input CPF Mascarado */}
+                <div className="flex flex-col">
+                  <label htmlFor="cpf" className="mb-1 font-medium text-sm text-gray-700">CPF</label>
+                  <input type="text" name="cpf" id="cpf" required placeholder="000.000.000-00" disabled={carregando}
+                    value={cpf} onChange={(e) => setCpf(maskCPF(e.target.value))}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                {/* Input Telefone Mascarado */}
+                <div className="flex flex-col">
+                  <label htmlFor="telefone" className="mb-1 font-medium text-sm text-gray-700">Telefone</label>
+                  <input type="tel" name="telefone" id="telefone" required placeholder="(00) 00000-0000" disabled={carregando}
+                    value={telefone} onChange={(e) => setTelefone(maskTelefone(e.target.value))}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="dataNasc" className="mb-1 font-medium text-sm text-gray-700">Data de Nascimento</label>
+                  <input type="date" name="dataNasc" id="dataNasc" required disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+              </div>
+            </div>
+
+            {/* Seção: Endereço e Perfil */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">
+                Endereço & Perfil
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                {/* Input CEP Mascarado */}
+                <div className="flex flex-col md:col-span-3">
+                  <label htmlFor="cep" className="mb-1 font-medium text-sm text-gray-700">CEP</label>
+                  <input type="text" name="cep" id="cep" required placeholder="00000-000" disabled={carregando}
+                    value={cep} onChange={(e) => setCep(maskCEP(e.target.value))}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                <div className="flex flex-col md:col-span-6">
+                  <label htmlFor="rua" className="mb-1 font-medium text-sm text-gray-700">Rua</label>
+                  <input type="text" name="rua" id="rua" required placeholder="Nome da rua, avenida..." disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                <div className="flex flex-col md:col-span-3">
+                  <label htmlFor="numero" className="mb-1 font-medium text-sm text-gray-700">Número</label>
+                  <input type="text" name="numero" id="numero" required placeholder="123" disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                <div className="flex flex-col md:col-span-4">
+                  <label htmlFor="complemento" className="mb-1 font-medium text-sm text-gray-700">Complemento <span className="text-gray-400 font-normal">(Opcional)</span></label>
+                  <input type="text" name="complemento" id="complemento" placeholder="Apto, Bloco..." disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                <div className="flex flex-col md:col-span-4">
+                  <label htmlFor="bairro" className="mb-1 font-medium text-sm text-gray-700">Bairro</label>
+                  <input type="text" name="bairro" id="bairro" required placeholder="Centro" disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                <div className="flex flex-col md:col-span-2">
+                  <label htmlFor="cidade" className="mb-1 font-medium text-sm text-gray-700">Cidade</label>
+                  <input type="text" name="cidade" id="cidade" required placeholder="Sua Cidade" disabled={carregando}
+                    className="border border-gray-300 rounded-lg p-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50" />
+                </div>
+
+                {/* Select de UF Unificado */}
+                <div className="flex flex-col md:col-span-2">
+                  <label htmlFor="estado" className="mb-1 font-medium text-sm text-gray-700">UF</label>
+                  <select
+                    name="estado"
+                    id="estado"
+                    required
+                    disabled={carregando}
+                    defaultValue=""
+                    className="border border-gray-300 rounded-lg p-2.5 bg-white text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all disabled:opacity-50 appearance-none"
+                  >
+                    <option value="" disabled hidden>--</option>
+                    {ESTADOS_BR.map((estado) => (
+                      <option key={estado.uf} value={estado.uf}>
+                        {estado.uf}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-6 items-center md:col-span-12 pt-2 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <span className="text-sm font-semibold text-gray-700">Tipo de Perfil:</span>
+                  <div className="flex items-center">
+                    <input type="radio" name="cargo" id="cargo-user" value="USER" defaultChecked className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" disabled={carregando} />
+                    <label htmlFor="cargo-user" className="ml-2 font-medium text-sm text-gray-700 cursor-pointer">Sou Usuário / Leitor</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input type="radio" name="cargo" id="cargo-biblio" value="BIBLIO" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" disabled={carregando} />
+                    <label htmlFor="cargo-biblio" className="ml-2 font-medium text-sm text-gray-700 cursor-pointer">Sou Bibliotecário</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={carregando}
+              className="w-full bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 text-white font-semibold text-md py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors shadow-md"
+            >
+              {carregando ? "Processando Cadastro..." : "Concluir Cadastro"}
+            </button>
+          </form>
+
+        </div>
+      </div>
     </div>
   );
 }

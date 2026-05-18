@@ -8,10 +8,14 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const usuarioExistente = await prisma.usuario.findUnique({
+
+
+    const usuarioExistente = await prisma.usuario.findMany({
       where: {
-        email: body.email,
-        cpf: body.cpf,
+        OR: [
+          { email: body.email },
+          { cpf: body.cpf }
+        ],
       },
     });
 
@@ -21,7 +25,7 @@ export async function POST(request: Request) {
 
 
     const novoUsuario = await prisma.$transaction(async (prisma) => {
-      
+
 
       const usuario = await prisma.usuario.create({
         data: {

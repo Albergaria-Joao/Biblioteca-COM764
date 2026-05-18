@@ -14,16 +14,18 @@ datasource db {
 }
 
 model Usuario {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
   nome           String
-  email          String   @unique
+  email          String    @unique
   senha          String?
   cpf            String?   @unique // Preferi usar CPF porque o RG vai ser substituído 
   dataNascimento DateTime?
   telefone       String?
-  situacao         String   @default("ESPERA")
-  status String @default("OFFLINE")
-  cargo          String   @default("USER")
+  situacao       String    @default("ESPERA")
+  status         String    @default("OFFLINE")
+  cargo          String    @default("USER")
+
+  dataFimSuspensao DateTime?
 
   cadastroCompleto Boolean @default(true)
 
@@ -35,7 +37,7 @@ model Usuario {
 }
 
 model Endereco {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
   rua         String
   numero      String
   complemento String?
@@ -43,9 +45,9 @@ model Endereco {
   cidade      String
   estado      String
   cep         String
-  usuarioId   String @unique @db.ObjectId // Relacionamento inverso para acessar o usuário associado a essee endereço
+  usuarioId   String  @unique @db.ObjectId // Relacionamento inverso para acessar o usuário associado a essee endereço
 
-  Usuario  Usuario @relation(fields: [usuarioId], references: [id]) // Coloco esse atributo do tipo Endereco pra criar a relação. O FK é o enderecoId
+  Usuario Usuario @relation(fields: [usuarioId], references: [id]) // Coloco esse atributo do tipo Endereco pra criar a relação. O FK é o enderecoId
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -72,9 +74,9 @@ model Reservas {
   // Tirei os atributos de livro daqui, podemos pegar pelo ID do acervo
   valiRes DateTime
 
-  retirada DateTime?
+  retirada  DateTime?
   devolucao DateTime?
-  prazo DateTime?
+  prazo     DateTime?
 
   token String
 
@@ -83,6 +85,9 @@ model Reservas {
 
   Acervo   Acervo @relation(fields: [acervoId], references: [id])
   acervoId String @db.ObjectId
+
+  emailValidadeEnviado Boolean @default(false)
+  email2DiasEnviado    Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

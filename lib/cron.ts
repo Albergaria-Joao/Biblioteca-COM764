@@ -1,107 +1,83 @@
 import cron from 'node-cron';
 import { prisma } from '@/lib/prisma';
-import { enviarEmailValidade } from '@/lib/email';
+import nodemailer from 'nodemailer'; // Certifique-se de importar o nodemailer
+import { enviarEmail2Dias } from '@/lib/email'; // Importa a função de envio de email
 
 export const registerCron = () => {
-  if (process.env.NODE_ENV === 'development') {
-    if ((global as any).cronStarted) {
-      return;
+    if (process.env.NODE_ENV === 'development') {
+        if ((global as any).cronStarted) {
+            return;
+        }
+        (global as any).cronStarted = true;
     }
-    (global as any).cronStarted = true;
-  }
 
-  console.log('inicializou cron');
+    console.log('🚀 Inicializou cron');
 
-  cron.schedule('*/5 * * * *', async () => {
-    
-    console.log('⏰ Verificando prazos...');
-    
-  });  
+    // Ajustado para rodar a cada 1 minuto
+    cron.schedule('*/1 * * * *', async () => {
+        console.log('⏰ Verificando prazos...');
+        try {
+            // CRÍTICO: Aguardar a execução da função assíncrona
+            await verificarPrazoAtraso();
+        } catch (error) {
+            console.error('❌ Erro durante a execução do cron:', error);
+        }
+    });
 };
 
-
-
-export async function verificarReservasExpiradas() {
-    const reservas = await prisma.reservas.findMany({
-      where: {
-        retirada: null,
-      },
-      select: {
-        valiRes: true,
-        createdAt: true,
-        Usuario: {
-            select: {
-                email: true,
-            }
-        },
-        Acervo : {
-            select: {
-                titulo: true,
-                autor: true,
-                isbn: true,
-            }
-        }
-      }
-    });
-
+export async function verificarPrazoAtraso() {
     const agora = new Date();
 
-    reservas.forEach(async (reserva) => {
-        const validade = new Date(reserva.valiRes);
-        if (validade < agora) {
-            console.log(`Reserva expirada: ${reserva.Usuario.email} - ${reserva.Acervo.titulo}`);
-            await enviarEmailValidade(
+    agora.setDate(agora.getDate() + 2);
+    console.log(`[Prazo] Verificando reservas com prazo até ${agora.toISOString()}...`);
+
+    // OTIMIZAÇÃO: Filtrar direto no banco apenas o que está atrasado
+    const reservas = await prisma.reservas.findMany({
+        where: {
+            prazo: {
+                not: null,
+                lte: agora // 2 dias em milissegundos
+            },
+            email2DiasEnviado: false
+        },
+        select: {
+            id: true,
+            retirada: true,
+            prazo: true,
+            Usuario: {
+                select: { email: true }
+            },
+            Acervo: {
+                select: { titulo: true, autor: true, isbn: true }
+            }
+        }
+    });
+
+    console.log(`[Atraso] Encontradas ${reservas.length} reservas atrasadas.`);
+    for (const reserva of reservas) {
+        try {
+            console.log(`Empréstimo atrasado detectado: ${reserva.Usuario.email} - ${reserva.Acervo.titulo}`);
+
+            // Garantir fallbacks para campos que podem ser null
+            const dataPrazo = reserva.prazo ?? new Date();
+            const dataRetirada = reserva.retirada ?? new Date();
+
+            await enviarEmail2Dias(
                 reserva.Usuario.email,
-                reserva.valiRes,
-                reserva.createdAt,
+                dataPrazo,
+                dataRetirada,
                 reserva.Acervo.titulo,
                 reserva.Acervo.autor,
                 reserva.Acervo.isbn
             );
+            await prisma.reservas.update({
+                where: { id: reserva.id },
+                data: { email2DiasEnviado: true }
+            });
+
+            console.log(`✅ Email enviado para ${reserva.Usuario.email}`);
+        } catch (emailError) {
+            console.error(`❌ Falha ao enviar e-mail para ${reserva.Usuario.email}:`, emailError);
         }
-    });
-
-}
-
-
-export async function verificarPrazo2Dias() {
-    const reservas = await prisma.reservas.findMany({
-      where: {
-        prazo: { not: null },
-      },
-      select: {
-        retirada: true,
-        prazo: true,
-        Usuario: {
-            select: {
-                email: true,
-            }
-        },
-        Acervo : {
-            select: {
-                titulo: true,
-                autor: true,
-                isbn: true,
-            }
-        }
-      }
-    });
-
-    const agora = new Date();
-
-    reservas.forEach(async (reserva) => {
-        const prazo = new Date(reserva.prazo!);
-        if (prazo < agora) {
-            console.log(`Empréstimo atrasado: ${reserva.Usuario.email} - ${reserva.Acervo.titulo}`);
-            await enviarEmailValidade(
-                reserva.Usuario.email,
-                reserva.prazo!,
-                reserva.retirada!,
-                reserva.Acervo.titulo,
-                reserva.Acervo.autor,
-                reserva.Acervo.isbn
-            );
-        }
-    });
-
+    }
 }
