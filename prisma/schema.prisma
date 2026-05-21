@@ -86,8 +86,8 @@ model Reservas {
   Acervo   Acervo @relation(fields: [acervoId], references: [id])
   acervoId String @db.ObjectId
 
-  emailValidadeEnviado Boolean @default(false)
-  email2DiasEnviado    Boolean @default(false)
+  emailAtrasoEnviado Boolean @default(false)
+  email2DiasEnviado  Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

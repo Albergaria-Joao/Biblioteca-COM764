@@ -96,3 +96,46 @@ export async function enviarEmail2Dias(email: string, dataPrazo: Date, dataRetir
     `,
   });
 }
+
+
+export async function enviarSuspensao(email: string, dataPrazo: Date, fimSuspensao: Date, titulo: string, autor: string, isbn: string) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: `"Sistema Biblioteca" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "USUÁRIO SUSPENSO - Empréstimo atrasado",
+    html: `
+      <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 20px;">
+          
+          <h2 style="color: #333; text-align: center;">Empréstimo prestes a atrasar</h2>
+
+          <p style="font-size: 16px; color: #555;">
+            Sua devolução está atrasada há mais de 5 dias. Infelizmente, isso resultou na suspensão do seu usuário para novas reservas até ${fimSuspensao.toLocaleDateString()}
+          </p>
+
+          <div style="background: #fafafa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><b>Título:</b> ${titulo}</p>
+            <p><b>Autor:</b> ${autor}</p>
+            <p><b>ISBN:</b> ${isbn}</p>
+          </div>
+          <p><b>Data de prazo para a devolução:</b> ${dataPrazo}</p>
+          <p><b>Data de fim da suspensão:</b> ${fimSuspensao}</p>
+
+          <hr style="margin: 30px 0;" />
+
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            Sistema Biblioteca • Este é um email automático
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}

@@ -1,5 +1,3 @@
-
-import { logout } from "../actions/auth";
 import { auth } from '@/auth';
 import AcervoTabela from "./components/AcervoTabela";
 import { prisma } from '@/lib/prisma';
