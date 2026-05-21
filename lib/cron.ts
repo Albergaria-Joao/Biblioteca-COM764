@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer'; // Certifique-se de importar o nodemailer
-import { enviarEmail2Dias, enviarSuspensao } from '@/lib/email'; // Importa a função de envio de email
+import { enviarEmail2Dias, enviarReativacao, enviarSuspensao } from '@/lib/email'; // Importa a função de envio de email
 
 export const registerCron = () => {
     if (process.env.NODE_ENV === 'development') {
@@ -20,6 +20,7 @@ export const registerCron = () => {
             // CRÍTICO: Aguardar a execução da função assíncrona
             await verificarPrazoAtraso();
             await suspenderAtraso();
+            await tirarSuspensao();
         } catch (error) {
             console.error('❌ Erro durante a execução do cron:', error);
         }
@@ -153,6 +154,54 @@ export async function suspenderAtraso() {
             console.log(`✅ Email enviado para ${reserva.Usuario.email}`);
         } catch (emailError) {
             console.error(`❌ Falha ao processar suspensão/e-mail para ${reserva.Usuario.email}:`, emailError);
+        }
+    }
+}
+
+
+
+export async function tirarSuspensao() {
+    const agora = new Date();
+
+    const suspensos = await prisma.usuario.findMany({
+        where: {
+            AND: [
+                { dataFimSuspensao: { isSet: true } },
+                { dataFimSuspensao: { not: null } },
+                { dataFimSuspensao: { lte: agora } },
+            ],
+            situacao: "SUSPENSO"
+        },
+        select: {
+            id: true,
+            email: true,
+            dataFimSuspensao: true,
+        }
+    });
+
+    console.log(`[Atraso] Encontrados ${suspensos.length} usuários suspensos para reativação.`);
+
+    for (const suspensao of suspensos) {
+        try {
+            console.log(`Usuário suspensos detectado: ${suspensao.email} - ${suspensao.dataFimSuspensao}`);
+
+            await prisma.usuario.update({
+                where: { id: suspensao.id },
+                data: {
+                    situacao: "ATIVO",
+                    dataFimSuspensao: null
+                }
+            });
+
+
+            await enviarReativacao(
+                suspensao.email,
+                suspensao.dataFimSuspensao!
+            );
+
+            console.log(`✅ Email enviado para ${suspensao.email}`);
+        } catch (emailError) {
+            console.error(`❌ Falha ao processar suspensão/e-mail para ${suspensao.email}:`, emailError);
         }
     }
 }

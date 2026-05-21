@@ -139,3 +139,41 @@ export async function enviarSuspensao(email: string, dataPrazo: Date, fimSuspens
     `,
   });
 }
+
+
+
+export async function enviarReativacao(email: string, fimSuspensao: Date) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: `"Sistema Biblioteca" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "USUÁRIO REATIVADO - Suspensão encerrada",
+    html: `
+      <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 20px;">
+          
+          <h2 style="color: #333; text-align: center;">Usuário reativado</h2>
+
+          <p style="font-size: 16px; color: #555;">
+            Sua suspensão foi encerrada. Você agora pode realizar novas reservas.
+          </p>
+
+          <p><b>Data de fim da suspensão:</b> ${fimSuspensao}</p>
+
+          <hr style="margin: 30px 0;" />
+
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            Sistema Biblioteca • Este é um email automático
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
