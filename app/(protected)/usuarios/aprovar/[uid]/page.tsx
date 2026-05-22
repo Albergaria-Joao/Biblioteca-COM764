@@ -34,6 +34,7 @@ export default async function UsuariosPage({ params }: { params: { uid: string }
       email: true,
       cpf: true,
       telefone: true,
+      situacao: true,
     },
   });
 
@@ -77,8 +78,16 @@ export default async function UsuariosPage({ params }: { params: { uid: string }
               <p className="text-gray-800">{usuario.telefone || "-"}</p>
             </div>
           </div>
-
-          <AprovarButton usuario={usuario} />
+          {usuario.situacao == "ESPERA" && (
+            <AprovarButton usuario={usuario} />
+          )}
+          {usuario.situacao != "ESPERA" && (
+            <div className="bg-gray-50 p-4 rounded-xl space-y-3 border">
+              <div>
+                <p className="text-gray-800">O cadastro do usuário já foi aprovado.</p>
+              </div>
+            </div>
+          )}
 
 
         </div>
