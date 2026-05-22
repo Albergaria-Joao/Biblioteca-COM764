@@ -25,7 +25,6 @@ export default async function ReservarPage({ params }: { params: Promise<{ reser
 			id: true,
 			valiRes: true,
 			retirada: true,
-			token: true,
 			Usuario: {
 				select: {
 					id: true,

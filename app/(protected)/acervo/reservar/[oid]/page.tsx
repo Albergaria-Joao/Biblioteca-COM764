@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { redirect, notFound } from 'next/navigation';
 import { toast } from "sonner";
 import { z } from "zod";
+import ReservaQR from '../../components/ReservaQR';
 
 function getRandomInt(min: number, max: number) {
 	min = Math.ceil(min);
@@ -42,6 +43,8 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 	}
 
 
+
+
 	const livro = await prisma.acervo.findUnique({
 		where: {
 			id: oid,
@@ -60,6 +63,34 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 		}
 	});
 
+	const reservaExistente = await prisma.reservas.findFirst({
+		where: {
+			usuarioId: session?.user.id,
+			acervoId: livro?.id,
+			OR: [
+				{ devolucao: null },
+				{ devolucao: { equals: undefined } },
+				{ devolucao: { isSet: false } },
+			],
+			valiRes: {
+				gte: new Date(),
+			}
+		},
+		select: {
+			id: true,
+			valiRes: true,
+
+		}
+	});
+
+	if (reservaExistente) {
+		return (
+			<div className="p-4">
+				<h1>Você já tem uma reserva ativa para este livro!</h1>
+
+			</div>);
+	}
+
 	if (!livro) {
 		return new NextResponse("Livro não encontrado", { status: 404 });
 	}
@@ -71,45 +102,22 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 	const dataReserva = new Date();
 	const validade = new Date(dataReserva.setDate(dataReserva.getDate() + 5));
 
-	const tokenHash = await bcrypt.hash(token.toString(), 10);
+	const websiteURL = process.env.WEBSITE_URL;
+	//const tokenHash = await bcrypt.hash(token.toString(), 10);
 
-	const reserva = await prisma.reservas.create({
-		data: {
-			valiRes: validade,
-			token: tokenHash,
-			usuarioId: session?.user.id,
-			acervoId: livro.id,
-		}
-	});
+	// const reserva = await prisma.reservas.create({
+	// 	data: {
+	// 		valiRes: validade,
+	// 		usuarioId: session?.user.id,
+	// 		acervoId: livro.id,
+	// 	}
+	// });
 
-	const livroAtualizado = await prisma.acervo.update({
-		where: {
-			id: livro.id,
-		},
-		data: {
-			unidades: livro.unidades - 1,
-		}
-	});
-
-
-	const urlQRCode = `${process.env.WEBSITE_URL}/acervo/ativar-reserva/${reserva.id}`
 
 	return (
 
 		<div className="p-4">
-			<h1 className="text-2xl font-bold mb-4">Reserva</h1>
-			<div>
-				<ul>
-					<li>ISBN: {livro?.isbn}</li>
-					<li>Título: {livro?.titulo}</li>
-					<li>Autor: {livro?.autor}</li>
-					<li>Editora: {livro?.editora}</li>
-					<li>Edição: {livro?.edicao}</li>
-					<li>Ano de Publicação: {livro?.anoPublicacao}</li>
-					<li>Gênero: {livro?.genero}</li>
-				</ul>
-			</div>
-			<QRCode url={urlQRCode} />
+			<ReservaQR livro={livro} email={session.user.email!} WEBSITE_URL={websiteURL!}></ReservaQR>
 
 
 		</div>

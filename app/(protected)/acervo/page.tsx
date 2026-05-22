@@ -41,10 +41,11 @@ export default async function AcervoPage() {
         </h1>
 
       </div>
-      <Link href="/acervo/adicionar" className="text-blue-600 hover:text-blue-700 py-2 px-4 rounded-lg transition font-medium  text-xl">
-        <Plus className="inline mr-2 mb-1" size={20} />
-        Adicionar Livro
-      </Link>
+      {(cargoUser === "ADMIN" || cargoUser === "BIBLIO") && (
+        <Link href="/acervo/adicionar" className="text-blue-600 hover:text-blue-700 py-2 px-4 rounded-lg transition font-medium  text-xl">
+          <Plus className="inline mr-2 mb-1" size={20} />
+          Adicionar Livro
+        </Link>)}
       <AcervoTabela cargoUser={cargoUser} livros={livros} />
     </div>
   );

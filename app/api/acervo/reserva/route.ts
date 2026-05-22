@@ -44,6 +44,68 @@ export async function GET(request: Request) {
 	}
 }
 
+export async function POST(request: Request) {
+
+	try {
+		const session = await auth();
+		if (!session || !session.user) {
+			console.log(session?.user.cargo);
+			return NextResponse.json(
+				{ error: "Usuário não autenticado" },
+				{ status: 401 }
+			);
+		}
+		const body = await request.json();
+
+		const dataReserva = new Date();
+		const validade = new Date(dataReserva.setDate(dataReserva.getDate() + 5));
+
+		const livro = await prisma.acervo.findUnique({
+			where: {
+				id: body.livroId,
+			},
+			select: {
+				unidades: true,
+			}
+		})
+
+		if (!livro || livro.unidades <= 0) {
+			return NextResponse.json(
+				{ error: "Livro sem unidades disponíveis" },
+				{ status: 400 }
+			);
+		}
+
+		const reserva = await prisma.reservas.create({
+			data: {
+				valiRes: validade,
+				usuarioId: session?.user.id,
+				acervoId: body.livroId,
+			}
+		});
+
+		const livroAtualizado = await prisma.acervo.update({
+			where: {
+				id: body.livroId,
+			},
+			data: {
+				unidades: livro.unidades - 1,
+			}
+		});
+
+		console.log(reserva);
+		return NextResponse.json(reserva, { status: 200 });
+
+	} catch (error) {
+		console.error(error);
+		return NextResponse.json(
+			{ error: "Erro ao reservar livro" },
+			{ status: 500 }
+		);
+	}
+}
+
+
 export async function PUT(request: Request) {
 
 	try {
@@ -62,9 +124,6 @@ export async function PUT(request: Request) {
 			where: {
 				id: body.id,
 			},
-			select: {
-				token: true,
-			}
 		})
 
 		if (!reserva) {

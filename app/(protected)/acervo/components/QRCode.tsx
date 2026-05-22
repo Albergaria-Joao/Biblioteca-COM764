@@ -24,14 +24,14 @@ export default function QRCodeGenerator({ url }: { url: string }) {
 
 
   return (
-      <div>
+    <div>
       {src ?
         <div>
           <img src={src} alt="QR Code" />
-          <a href="src" download={`Reserva.png`}>Download</a>
+          <a href={src} download={`Reserva.png`}>Download</a>
         </div>
         : <p>Gerando...</p>}
-      
+
     </div>
   );
 }

@@ -16,6 +16,13 @@ export default async function AcervoPage() {
     let reservas: any[];
     if (session.user.cargo == 'BIBLIO' || session.user.cargo == 'ADMIN') {
         reservas = await prisma.reservas.findMany({
+            where: {
+                OR: [
+                    { prazo: null },
+                    { prazo: { equals: undefined } },
+                    { prazo: { isSet: false } },
+                ],
+            },
             select: {
                 id: true,
                 createdAt: true,
@@ -27,6 +34,7 @@ export default async function AcervoPage() {
                         autor: true,
                     }
                 },
+
                 Usuario: {
                     select: {
                         nome: true,
@@ -38,7 +46,12 @@ export default async function AcervoPage() {
     else {
         reservas = await prisma.reservas.findMany({
             where: {
-                usuarioId: session.user.id
+                usuarioId: session.user.id,
+                OR: [
+                    { prazo: null },
+                    { prazo: { equals: undefined } },
+                    { prazo: { isSet: false } },
+                ],
             },
             select: {
                 id: true,
@@ -51,6 +64,7 @@ export default async function AcervoPage() {
                         autor: true,
                     }
                 },
+
                 Usuario: {
                     select: {
                         nome: true,

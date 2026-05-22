@@ -1,5 +1,7 @@
-import nodemailer from "nodemailer";
+"use server";
 
+import nodemailer from "nodemailer";
+import QRCode from "qrcode";
 // Ele não teria que enviar p/ todos os bibliotecarios?
 
 export async function enviarEmailCadastro(usuario: any) {
@@ -175,5 +177,66 @@ export async function enviarReativacao(email: string, fimSuspensao: Date) {
         </div>
       </div>
     `,
+  });
+}
+
+
+export async function enviarEmailQRCode(email: string, titulo: string, autor: string, isbn: string, validade: Date, url: string) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const qrCodeDataUrl = await QRCode.toDataURL(url, {
+    width: 300,
+    margin: 2,
+    color: {
+      dark: "#000000ff",
+      light: "#ffffffff",
+    },
+  });
+
+  console.log('URL QR EMAIL: ', url);
+
+  await transporter.sendMail({
+    from: `"Sistema Biblioteca" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "RESERVA REALIZADA",
+    html: `
+      <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 20px;">
+          
+          <h2 style="color: #333; text-align: center;">Reserva realizada com sucesso</h2>
+
+          <div style="background: #fafafa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><b>Título:</b> ${titulo}</p>
+            <p><b>Autor:</b> ${autor}</p>
+            <p><b>ISBN:</b> ${isbn}</p>
+          </div>
+          <p><b>Data de validade da reserva:</b> ${validade}</p>
+
+          <div style="text-align: center; margin: 20px 0;">
+            <img src="cid:qrcode_reserva" alt="QR Code" style="width: 200px; height: 200px;" />
+          </div>
+
+          <hr style="margin: 30px 0;" />
+
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            Sistema Biblioteca • Este é um email automático
+          </p>
+        </div>
+      </div>
+    `,
+    // 2. Adicione a propriedade 'attachments' aqui embaixo
+    attachments: [
+      {
+        filename: 'qrcode.png',
+        path: qrCodeDataUrl, // O nodemailer entende automaticamente strings em Base64 aqui
+        cid: 'qrcode_reserva' // Este ID DEVE ser idêntico ao que está no src="cid:..." do HTML
+      }
+    ]
   });
 }

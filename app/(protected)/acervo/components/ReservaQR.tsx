@@ -2,82 +2,98 @@
 
 import { z } from "zod";
 import { useState, useEffect } from "react";
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { actionEmailQRCode } from "@/app/actions/reserva";
+import QRCode from "./QRCode";
+import { enviarEmailQRCode } from "@/lib/email";
 // Depois, ver de colocar alguma pasta só com os tipos (ex: types/Livro.ts) e importar de lá, pra evitar repetição
 
 interface Props {
-    reservaId: string;
-    dataPrazo: Date;
-    dataRetirada: Date;
+    livro: {
+        id: string;
+        isbn: string;
+        titulo: string;
+        autor: string;
+        editora: string;
+        edicao: string;
+        anoPublicacao: number;
+        genero: string;
+    },
+    email: string,
+    WEBSITE_URL: string
 }
 
-const tokenSchema = z.object({
-    tkn: z.string().regex(/^\d{6}$/)
-});
 
 
-
-export default function ReservaToken({ reservaId, dataPrazo, dataRetirada }: Props) {
+export default function ReservaToken({ livro, email, WEBSITE_URL }: Props) {
 
     const [token, setToken] = useState<string | null>(null);
     const [reservado, setReservado] = useState<boolean>(false);
-    const searchParams = useSearchParams()
-    const oid = searchParams.get('oid')
+    const [reservaId, setReservaId] = useState<string>("");
+    //const searchParams = useSearchParams()
+    //const oid = searchParams.get('oid')
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const router = useRouter();
+    console.log(process.env.WEBSITE_URL);
+    const handleReserva = async () => {
 
-        tokenSchema.safeParse(token);
-
-        e.preventDefault();
         const response = await fetch(`/api/acervo/reserva`, {
-            method: 'PUT',
-            body: JSON.stringify({ id: reservaId, dataPrazo: dataPrazo, dataRetirada: dataRetirada, token: token })
+            method: 'POST',
+            body: JSON.stringify({ livroId: livro.id })
         });
+
+        const data = await response.json().catch(() => null);
+        console.log(data.id);
+
         if (response.ok) {
             setReservado(true);
+            setReservaId(data.id);
+            console.log("ID RESERVA: ", data.id)
+            const temp = `${WEBSITE_URL}/acervo/ativar-reserva/${data.id}`
+            console.log("TEMP: ", temp)
+            enviarEmailQRCode(email, livro.titulo, livro.autor, livro.isbn, data.valiRes, temp)
         } else {
             alert("ERRO NA RESERVA: " + (await response.json()).error);
         }
     }
 
+    const urlQRCode = `${WEBSITE_URL}/acervo/ativar-reserva/${reservaId}`;
 
     return (
         <div>
             {!reservado && (
-                <form onSubmit={handleSubmit} onChange={(e) => {
-                    setToken(e.target.value);
-                }} className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-xl text-gray-800">
-                    <h2 className="text-2xl font-bold mb-6 border-b pb-2">Informações do Livro</h2>
-
-                    {/* Grid para informações principais */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-8">
-
-                        {/* Título: Ocupa mais espaço */}
-                        <div className="flex flex-col md:col-span-8">
-                            <label htmlFor="titulo" className="mb-1 font-medium text-sm">TOKEN DA RESERVA</label>
-                            <input type="text" name="titulo" id="titulo" required placeholder="Token numérico gerado"
-                                className="border border-gray-300 rounded-md p-2.5 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all" />
-                        </div>
-
-
-                    </div>
-
+                <div>
                     <button
-                        type="submit"
                         className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold text-lg py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors shadow-md"
+                        onClick={handleReserva}
                     >
-                        Ativar reserva
+                        Confirmar reserva
                     </button>
-                </form>)}
+                    <button
+                        className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold text-lg py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors shadow-md"
+                        onClick={() => { router.back() }}
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            )}
 
 
             {reservado && (
                 <div>
-                    <h2>Reserva efetuada com sucesso!</h2>
-                    <ul>
-                        <li>Data da reserva: {dataRetirada.toISOString()}</li>
-                        <li>Prazo de devolução: {dataPrazo.toISOString()}</li>
-                    </ul>
+                    <h1 className="text-2xl font-bold mb-4">Reserva</h1>
+                    <div>
+                        <ul>
+                            <li>ISBN: {livro?.isbn}</li>
+                            <li>Título: {livro?.titulo}</li>
+                            <li>Autor: {livro?.autor}</li>
+                            <li>Editora: {livro?.editora}</li>
+                            <li>Edição: {livro?.edicao}</li>
+                            <li>Ano de Publicação: {livro?.anoPublicacao}</li>
+                            <li>Gênero: {livro?.genero}</li>
+                        </ul>
+                    </div>
+                    <QRCode url={urlQRCode} />
                 </div>
             )}
 
