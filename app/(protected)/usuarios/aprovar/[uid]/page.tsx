@@ -7,7 +7,7 @@ import AprovarButton from "./components/AprovarButton";
 
 export default async function UsuariosPage({ params }: { params: { uid: string } }) {
 
-  const { uid } = params;
+  const { uid } = await params;
   const session = await auth();
 
   if (!session) {
@@ -20,6 +20,7 @@ export default async function UsuariosPage({ params }: { params: { uid: string }
 
 
   if (!uid) {
+    console.log("UID NÃO ENCONTRADO")
     redirect("/login");
   }
 
@@ -37,6 +38,7 @@ export default async function UsuariosPage({ params }: { params: { uid: string }
   });
 
   if (!usuario) {
+    console.log("USER NÃO ENCONTRADO")
     redirect("/login")
   }
 
@@ -76,7 +78,7 @@ export default async function UsuariosPage({ params }: { params: { uid: string }
             </div>
           </div>
 
-          <AprovarButton usuario={usuario}  />
+          <AprovarButton usuario={usuario} />
 
 
         </div>

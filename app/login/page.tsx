@@ -23,6 +23,22 @@ export default function LoginPage() {
         setCarregando(true);
         setErroMensagem(null); // Reseta erros anteriores
 
+
+        const response = await fetch("/api/auth/checar-situacao", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
+
+        if (!response.ok) {
+            const dados = await response.json();
+            if (dados.erro === "USUARIO_EM_ESPERA") {
+                setErroMensagem("Sua conta está em ESPERA. Aguarde a aprovação do administrador para acessar o sistema.");
+                setCarregando(false);
+                return; // Interrompe o fluxo aqui! O NextAuth nem é chamado.
+            }
+        }
+
         const result = await signIn("credentials", {
             email,
             password: senha,

@@ -6,6 +6,7 @@ declare module "next-auth" {
       id: string;
       userId: string;
       cargo: string;
+      situacao: string;
     } & DefaultSession["user"]
   }
 
@@ -19,5 +20,6 @@ declare module "next-auth/jwt" {
     id: string;
     userId: string;
     cargo: string;
+    situacao: string;
   }
 }

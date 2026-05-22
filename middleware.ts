@@ -28,6 +28,13 @@ export default auth((req) => {
   }
 
 
+  if (!isLogged && nextUrl.pathname.startsWith("/usuarios/aprovar")) {
+    const loginUrl = new URL('/login', nextUrl)
+    // Armazena a página que ele tentou acessar
+    loginUrl.searchParams.set('callbackUrl', nextUrl.pathname)
+    return Response.redirect(loginUrl)
+  }
+
 });
 
 export const config = {

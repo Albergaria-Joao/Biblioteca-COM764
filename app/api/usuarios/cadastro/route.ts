@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       },
     });
 
-    if (usuarioExistente) {
+    if (usuarioExistente.length != 0) {
       return NextResponse.json({ error: "Já existe um usuário com esse email ou CPF" }, { status: 400 });
     }
 
