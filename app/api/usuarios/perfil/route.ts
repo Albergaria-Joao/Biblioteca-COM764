@@ -35,7 +35,7 @@ export async function GET() {
 
         const endereco = await prisma.endereco.findUnique({
             where: {
-                usuarioId: userId,
+                id: userId,
             },
             select: {
                 rua: true,
@@ -136,7 +136,7 @@ export async function POST(req: Request) {
         });
 
         const endereco = await prisma.endereco.findUnique({
-            where: { usuarioId: userId },
+            where: { id: userId },
             select: { id: true },
         });
 

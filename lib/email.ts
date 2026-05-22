@@ -2,7 +2,10 @@
 
 import nodemailer from "nodemailer";
 import QRCode from "qrcode";
+import prisma from "@/lib/prisma";
+import { Library } from "lucide-react";
 // Ele não teria que enviar p/ todos os bibliotecarios?
+
 
 export async function enviarEmailCadastro(usuario: any) {
   const transporter = nodemailer.createTransport({
@@ -15,10 +18,20 @@ export async function enviarEmailCadastro(usuario: any) {
 
   const linkAprovar = `http://localhost:3000/usuarios/aprovar/${usuario.id}`;
 
+  const libMail = await prisma.usuario.findMany({
+    where: {
+      cargo: "BIBLIO",
+    },
+    select: {
+      email: true,
+    }
+  })
+
+  const emails = libMail.map(user => user.email);
+
   await transporter.sendMail({
     from: `"Sistema Biblioteca" <${process.env.EMAIL_USER}>`,
-    //to: "tg5tsxrdfe@gmail.com",
-    to: "jvab1609@gmail.com",
+    bcc: emails,
     subject: "Novo cadastro pendente",
     html: `
       <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
