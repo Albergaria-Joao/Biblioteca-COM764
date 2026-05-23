@@ -35,7 +35,12 @@ export default function LoginPage() {
             if (dados.erro === "USUARIO_EM_ESPERA") {
                 setErroMensagem("Sua conta está em ESPERA. Aguarde a aprovação do administrador para acessar o sistema.");
                 setCarregando(false);
-                return; // Interrompe o fluxo aqui! O NextAuth nem é chamado.
+                return;
+            }
+            if (dados.erro === "BIBLIO_ONLINE") {
+                setErroMensagem("Já existe um bibliotecário on-line no sistema. Aguarde um momento e tente novamente.");
+                setCarregando(false);
+                return;
             }
         }
 

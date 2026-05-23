@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import Sidebar from "./components/Sidebar";
+import StatusTracker from './components/StatusTracker';
 
 export default async function SistemaLayout({
     children,
@@ -15,7 +16,7 @@ export default async function SistemaLayout({
 
     return (
         <div className="flex bg-gray-200 min-h-screen">
-
+            <StatusTracker userId={session.user.id}></StatusTracker>
             {/* SIDEBAR */}
             <Sidebar session={session} />
 
