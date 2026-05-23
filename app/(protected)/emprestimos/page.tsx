@@ -82,11 +82,11 @@ export default async function AcervoPage() {
 
     return (
         <div className="p-6 min-h-screen">
-            <div className="flex justify-between items-center mb-6">
+            {/* <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">
                     Lista de Empréstimos
                 </h1>
-            </div>
+            </div> */}
             <EmprestimosTabela emprestimos={emprestimos} devolver={session.user.cargo == 'BIBLIO' || session.user.cargo == 'ADMIN'} />
         </div>
     );

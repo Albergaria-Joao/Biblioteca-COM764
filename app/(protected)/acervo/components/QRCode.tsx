@@ -28,7 +28,7 @@ export default function QRCodeGenerator({ url }: { url: string }) {
       {src ?
         <div>
           <img src={src} alt="QR Code" />
-          <a href={src} download={`Reserva.png`}>Download</a>
+          <a href={src} download={`Reserva.png`} className="font-bold text-blue-600 underline">Clique aqui para baixar</a>
         </div>
         : <p>Gerando...</p>}
 

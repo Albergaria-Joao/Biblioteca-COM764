@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
-import { BookAIcon, BookOpenIcon, UserIcon, RefreshCcw } from "lucide-react"
+import { LibraryBig, BookOpenIcon, UserCircle2, RefreshCcw, Users } from "lucide-react"
 import { auth } from '@/auth';
 import type { Session } from "next-auth";
 
@@ -18,13 +18,14 @@ export default function Sidebar({ session }: SidebarProps) {
 	const pathname = usePathname();
 
 	const links = [
-		{ nome: "Acervo", href: "/acervo", icon: <BookAIcon size={20} /> },
+		{ nome: "Acervo", href: "/acervo", icon: <LibraryBig size={20} /> },
+
 
 	];
 
 	if (session?.user?.cargo === "BIBLIO" || session?.user?.cargo === "ADMIN") {
 		links.push(
-			{ nome: "Usuários", href: "/usuarios", icon: <UserIcon size={20} /> },
+			{ nome: "Usuários", href: "/usuarios", icon: <Users size={20} /> },
 			{ nome: "Reservas", href: "/reservas", icon: <BookOpenIcon size={20} /> },
 			{ nome: "Empréstimos", href: "/emprestimos", icon: <RefreshCcw size={20} /> }
 		)
@@ -35,6 +36,9 @@ export default function Sidebar({ session }: SidebarProps) {
 			{ nome: "Meus Empréstimos", href: "/emprestimos", icon: <RefreshCcw size={20} /> }
 		)
 	}
+
+	links.push({ nome: "Perfil", href: "/perfil", icon: <UserCircle2 size={20} /> },)
+
 	return (
 		<aside className="w-72 sticky top-0 h-screen bg-slate-900 text-white flex flex-col shadow-2xl">
 

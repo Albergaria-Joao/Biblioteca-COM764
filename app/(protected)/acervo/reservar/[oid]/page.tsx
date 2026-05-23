@@ -8,6 +8,7 @@ import { redirect, notFound } from 'next/navigation';
 import { toast } from "sonner";
 import { z } from "zod";
 import ReservaQR from '../../components/ReservaQR';
+import StatusCard from '../../components/StatusCard'
 
 function getRandomInt(min: number, max: number) {
 	min = Math.ceil(min);
@@ -85,10 +86,16 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 
 	if (reservaExistente) {
 		return (
-			<div className="p-4">
-				<h1>Você já tem uma reserva/empréstimo ativo para este livro!</h1>
-
-			</div>);
+			<StatusCard
+				tipo="warning"
+				titulo="Reserva já existente"
+				descricao="
+                Você já possui uma reserva ou empréstimo
+                ativo deste livro. Aguarde a devolução
+                ou o vencimento da reserva atual antes
+                de realizar uma nova solicitação.
+            "
+			/>);
 	}
 
 	const reservasUser = await prisma.reservas.findMany({
@@ -117,10 +124,16 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 
 	if (reservasCount >= 2) {
 		return (
-			<div className="p-4">
-				<h1>Você já tem o máximo de 2 reservas/empréstimos ativos por usuário</h1>
-
-			</div>);
+			<StatusCard
+				tipo="warning"
+				titulo="Limite atingido"
+				descricao="
+                Você atingiu o limite máximo de
+                2 reservas/empréstimos ativos.
+                Finalize uma devolução antes
+                de reservar outro livro.
+            "
+			/>);
 	}
 
 

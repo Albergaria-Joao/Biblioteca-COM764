@@ -8,12 +8,12 @@ export async function GET() {
   try {
 
     const session = await auth();  // O próprio nextAuth vai pegar o token dos cookies, validar ele, e retornar os dados do usuário (payload) caso o token seja válido
-    
+
     if (!session || !session.user) {
-        return NextResponse.json(
+      return NextResponse.json(
         { error: "Usuário não autenticado" },
         { status: 401 }
-        );
+      );
     }
 
     // Funciona que nem um select do SQL. Você escolhe as colunas e um limite (take)
@@ -24,6 +24,12 @@ export async function GET() {
         email: true,
         cpf: true,
         telefone: true,
+        endereco: {
+          select: {
+            cep: true,
+            numero: true,
+          }
+        }
       },
     });
 

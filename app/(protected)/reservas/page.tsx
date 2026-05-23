@@ -79,11 +79,6 @@ export default async function AcervoPage() {
 
     return (
         <div className="p-6 min-h-screen">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">
-                    Reservas de Livros
-                </h1>
-            </div>
             <ReservasTabela reservas={reservas} cancelar={session.user.cargo == 'BIBLIO' || session.user.cargo == 'ADMIN'} />
         </div>
     );
