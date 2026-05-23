@@ -22,7 +22,13 @@ export default async function AcervoPage() {
                 },
                 prazo: {
                     not: null,
-                }
+                },
+                OR: [
+                    { devolucao: null },
+                    { devolucao: { equals: undefined } },
+                    { devolucao: { isSet: false } },
+                ],
+
             },
             select: {
                 id: true,
@@ -81,7 +87,7 @@ export default async function AcervoPage() {
                     Lista de Empréstimos
                 </h1>
             </div>
-            <EmprestimosTabela emprestimos={emprestimos} />
+            <EmprestimosTabela emprestimos={emprestimos} devolver={session.user.cargo == 'BIBLIO' || session.user.cargo == 'ADMIN'} />
         </div>
     );
 }

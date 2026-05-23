@@ -86,10 +86,43 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 	if (reservaExistente) {
 		return (
 			<div className="p-4">
-				<h1>Você já tem uma reserva ativa para este livro!</h1>
+				<h1>Você já tem uma reserva/empréstimo ativo para este livro!</h1>
 
 			</div>);
 	}
+
+	const reservasUser = await prisma.reservas.findMany({
+		where: {
+			usuarioId: session?.user.id,
+			OR: [
+				{ devolucao: null },
+				{ devolucao: { equals: undefined } },
+				{ devolucao: { isSet: false } },
+				{ devolucao: { lt: new Date() } }
+			],
+			valiRes: {
+				gte: new Date(),
+			}
+		},
+		select: {
+			id: true,
+			valiRes: true,
+
+		}
+	});
+
+	const reservasCount = reservasUser.length;
+
+
+
+	if (reservasCount >= 2) {
+		return (
+			<div className="p-4">
+				<h1>Você já tem o máximo de 2 reservas/empréstimos ativos por usuário</h1>
+
+			</div>);
+	}
+
 
 	if (!livro) {
 		return new NextResponse("Livro não encontrado", { status: 404 });

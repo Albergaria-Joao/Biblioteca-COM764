@@ -243,12 +243,12 @@ export async function enviarEmailQRCode(email: string, titulo: string, autor: st
         </div>
       </div>
     `,
-    // 2. Adicione a propriedade 'attachments' aqui embaixo
+
     attachments: [
       {
         filename: 'qrcode.png',
-        path: qrCodeDataUrl, // O nodemailer entende automaticamente strings em Base64 aqui
-        cid: 'qrcode_reserva' // Este ID DEVE ser idêntico ao que está no src="cid:..." do HTML
+        path: qrCodeDataUrl,
+        cid: 'qrcode_reserva'
       }
     ]
   });
