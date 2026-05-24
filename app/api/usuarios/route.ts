@@ -42,3 +42,41 @@ export async function GET() {
   }
 }
 
+export async function POST(req: Request) {
+  try {
+    const { id } = await req.json();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID não informado" },
+        { status: 400 }
+      );
+    }
+
+    // apaga endereço ligado ao usuário
+    await prisma.endereco.deleteMany({
+      where: {
+        usuarioId: id,
+      },
+    });
+
+    // apaga usuário
+    await prisma.usuario.delete({
+      where: {
+        id,
+      },
+    });
+
+    return NextResponse.json(
+      { message: "Usuário removido com sucesso" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Erro ao remover usuário" },
+      { status: 500 }
+    );
+  }
+}
