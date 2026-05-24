@@ -27,7 +27,7 @@ export async function enviarEmailCadastro(usuario: any) {
     }
   })
 
-  const emails = libMail.map(user => user.email);
+  const emails = libMail.map((user: { email: string }) => user.email);
 
   await transporter.sendMail({
     from: `"Sistema Biblioteca" <${process.env.EMAIL_USER}>`,

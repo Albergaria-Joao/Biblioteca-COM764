@@ -11,8 +11,8 @@ export async function GET() {
 
         if (!session || !session.user) {
             return NextResponse.json(
-            { error: "Usuário não autenticado" },
-            { status: 401 }
+                { error: "Usuário não autenticado" },
+                { status: 401 }
             );
         }
 
@@ -35,7 +35,7 @@ export async function GET() {
 
         const endereco = await prisma.endereco.findUnique({
             where: {
-                id: userId,
+                usuarioId: userId,
             },
             select: {
                 rua: true,
@@ -44,8 +44,9 @@ export async function GET() {
                 cidade: true,
                 estado: true,
                 cep: true,
+                complemento: true,
             },
-        })
+        });
 
         if (!usuario) return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
 
@@ -110,8 +111,8 @@ export async function POST(req: Request) {
 
         if (!session || !session.user) {
             return NextResponse.json(
-            { error: "Usuário não autenticado" },
-            { status: 401 }
+                { error: "Usuário não autenticado" },
+                { status: 401 }
             );
         }
 
@@ -136,8 +137,12 @@ export async function POST(req: Request) {
         });
 
         const endereco = await prisma.endereco.findUnique({
-            where: { id: userId },
-            select: { id: true },
+            where: {
+                usuarioId: userId,
+            },
+            select: {
+                id: true,
+            },
         });
 
         if (!endereco) {
