@@ -10,15 +10,15 @@ interface Props {
 }
 
 export default function EfetivarButton({ reservaId, dataPrazo, dataRetirada }: Props) {
-    
+
     const [reservado, setReservado] = useState<boolean>(false);
 
     const router = useRouter();
 
-    const reservar = async({ reservaId, dataPrazo, dataRetirada }: Props) => {
+    const reservar = async ({ reservaId, dataPrazo, dataRetirada }: Props) => {
         const response = await fetch(`/api/acervo/reserva`, {
-            method:'PUT',
-            body: JSON.stringify({id: reservaId, dataPrazo: dataPrazo, dataRetirada: dataRetirada})
+            method: 'PUT',
+            body: JSON.stringify({ id: reservaId, dataPrazo: dataPrazo, dataRetirada: dataRetirada })
         });
         if (response.ok) {
             setReservado(true);
@@ -31,18 +31,14 @@ export default function EfetivarButton({ reservaId, dataPrazo, dataRetirada }: P
         <div>
             {!reservado && (
                 <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full"
-                    onClick={() => { reservar({ reservaId, dataPrazo, dataRetirada })}}
+                    onClick={() => { reservar({ reservaId, dataPrazo, dataRetirada }) }}
                 >Efetivar reserva</button>
             )}
-            
+
 
             {reservado && (
                 <div>
-                    <h2>Reserva efetuada com sucesso!</h2>
-                    <ul>
-                            <li>Data da reserva: {dataRetirada.toISOString()}</li>
-                            <li>Prazo de devolução: {dataPrazo.toISOString()}</li>
-                    </ul>
+                    <h2 className="text-xl text-blue-500">Reserva efetuada com sucesso!</h2>
                 </div>
             )}
         </div>

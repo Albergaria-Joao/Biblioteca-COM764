@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { logout } from "@/app/actions/auth";
 import { LibraryBig, BookOpenIcon, UserCircle2, RefreshCcw, Users } from "lucide-react"
 import { auth } from '@/auth';
@@ -14,8 +15,28 @@ interface SidebarProps {
 }
 
 
+export function useWindowSize() {
+	const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
+	useEffect(() => {
+		function handleResize() {
+			setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+		}
+		window.addEventListener("resize", handleResize);
+		handleResize(); // Set initial size
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
+	return windowSize;
+}
+
 export default function Sidebar({ session }: SidebarProps) {
 	const pathname = usePathname();
+
+	if (useWindowSize().width < 768) {
+		return null;
+	}
+
+
 
 	const links = [
 		{ nome: "Acervo", href: "/acervo", icon: <LibraryBig size={20} /> },
@@ -38,6 +59,8 @@ export default function Sidebar({ session }: SidebarProps) {
 	}
 
 	links.push({ nome: "Perfil", href: "/perfil", icon: <UserCircle2 size={20} /> },)
+
+
 
 	return (
 		<aside className="w-72 sticky top-0 h-screen bg-slate-900 text-white flex flex-col shadow-2xl">

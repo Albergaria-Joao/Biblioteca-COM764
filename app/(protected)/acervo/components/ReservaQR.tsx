@@ -81,6 +81,7 @@ export default function ReservaToken({
                 const temp =
                     `${WEBSITE_URL}/acervo/ativar-reserva/${data.id}`;
 
+                console.log("EMAIL EENVIADO", email);
                 enviarEmailQRCode(
                     email,
                     livro.titulo,
