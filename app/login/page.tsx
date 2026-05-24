@@ -4,14 +4,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from "next/link";
 import { z } from "zod";
 import { LoginButton } from "./components/LoginButton";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
 const loginSchema = z.object({
     email: z.string().email("Por favor, insira um e-mail válido."),
     senha: z.string().min(1, "A senha é obrigatória."),
 });
 
-export default function LoginPage() {
+
+function LoginForm() {
     const [carregando, setCarregando] = useState(false);
     const [erroMensagem, setErroMensagem] = useState<string | null>(null);
     const router = useRouter();
@@ -21,8 +22,7 @@ export default function LoginPage() {
 
     async function efetuarLogin(email: string, senha: string) {
         setCarregando(true);
-        setErroMensagem(null); // Reseta erros anteriores
-
+        setErroMensagem(null);
 
         const response = await fetch("/api/auth/checar-situacao", {
             method: "POST",
@@ -68,7 +68,6 @@ export default function LoginPage() {
         const validacao = loginSchema.safeParse(dadosBrutos);
 
         if (!validacao.success) {
-            // Pega a primeira mensagem de erro definida no esquema Zod
             const primeiroErro = validacao.error.message || "Erro de validação nos campos.";
             setErroMensagem(primeiroErro);
             return;
@@ -95,7 +94,6 @@ export default function LoginPage() {
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow-xl rounded-xl sm:px-10 border border-gray-100">
 
-                    {/* Banner de Erro Estilizado */}
                     {erroMensagem && (
                         <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-start gap-2.5 animate-fadeIn">
                             <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -145,7 +143,6 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    {/* Divisor Visual */}
                     <div className="mt-6">
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
@@ -163,5 +160,17 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <p className="text-gray-500 animate-pulse">Carregando formulário...</p>
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     );
 }

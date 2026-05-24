@@ -1,7 +1,11 @@
 'use client';
 import { useEffect } from 'react';
 
-export default function StatusTracker({ userId }) {
+interface StatusTrackerProps {
+    userId: string;
+}
+
+export default function StatusTracker({ userId }: StatusTrackerProps) {
     useEffect(() => {
         if (!userId) return;
 

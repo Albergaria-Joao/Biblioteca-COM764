@@ -138,11 +138,11 @@ export default async function ReservarPage({ params }: { params: Promise<{ oid: 
 
 
 	if (!livro) {
-		return new NextResponse("Livro não encontrado", { status: 404 });
+		return redirect("/acervo");
 	}
 
 	if (livro.unidades <= 0) {
-		return new NextResponse("Livro sem unidades disponíveis", { status: 400 });
+		return redirect("/acervo");
 	}
 
 	const dataReserva = new Date();
