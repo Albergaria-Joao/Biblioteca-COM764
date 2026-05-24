@@ -116,7 +116,8 @@ export default function AcervoForm({ tipo }: AcervoFormProps) {
         const res = await editarLivro(novoLivro);
         const resJson = await res.json();
         if (resJson?.error) {
-            alert("ERRO NA CRIAÇÃO: " + resJson.error);
+            //alert("ERRO NA CRIAÇÃO: " + resJson.error);
+            setErroMensagem("ERRO NA CRIAÇÃO: " + resJson.error)
         } else {
             // if (tipo === "adicionar") {
             //     alert("LIVRO ADICIONADO");
