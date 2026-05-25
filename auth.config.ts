@@ -17,5 +17,9 @@ export default {
         return null;
       },
     }),
+    
   ],
+  pages: {
+    error: "/error",
+  }
 } satisfies NextAuthConfig;

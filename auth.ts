@@ -4,6 +4,7 @@ import authConfig from "./auth.config";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import Credentials from "next-auth/providers/credentials";
+import { enviarEmailCadastro } from "./lib/email";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -19,8 +20,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email: user.email },
         });
 
+        
+        console.log(usuarioExiste);
+
         if (!usuarioExiste) {
-          await prisma.usuario.create({
+          const newUser = await prisma.usuario.create({
             data: {
               email: user.email,
               nome: user.name ?? "Usuário",
@@ -29,6 +33,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               cadastroCompleto: false,
             },
           });
+          console.log("USER CRIADO GOOGLE");
+          await enviarEmailCadastro(newUser);
+
+          return false;
+        }
+
+        if (usuarioExiste?.situacao != "ATIVADO") {
+
+          console.log('PEGOU AQUI');
+          return false;
         }
 
         return true; // Retorna true se existe, false se não
@@ -71,7 +85,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.usuario.findUnique({
-          where: { email: credentials.email as string, situacao: { not: "ESPERA" } },
+          where: { email: credentials.email as string, situacao: "ATIVADO" },
         });
 
         if (!user || !user.senha) return null;
